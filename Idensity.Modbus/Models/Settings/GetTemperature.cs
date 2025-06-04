@@ -8,6 +8,7 @@ public class GetTemperature
     /// Источник получения температуры.
     /// </summary>
     public GetTemperatureSrc Src { get; internal set; }
-    public GetTemperatureCoeffs[] GetTemperatureCoeffs { get; } = new GetTemperatureCoeffs[2];
+    public GetTemperatureCoeffs[] GetTemperatureCoeffs { get; } = 
+        Enumerable.Range(0, 2).Select(i => new GetTemperatureCoeffs()).ToArray()  ;
 
 }

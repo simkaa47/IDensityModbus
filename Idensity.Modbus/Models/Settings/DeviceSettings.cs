@@ -38,7 +38,8 @@ public class DeviceSettings
     /// <summary>
     /// Настройки фильтра калмана
     /// </summary>
-    public KalmanSettings[] KalmanSettings { get; } = new KalmanSettings[2];
+    public KalmanSettings[] KalmanSettings { get; } = 
+        Enumerable.Range(0,2).Select(i=>new KalmanSettings()).ToArray();
     /// <summary>
     /// Номер проекта
     /// </summary>
@@ -62,11 +63,7 @@ public class DeviceSettings
     /// <summary>
     /// Настйроки аналоговых выходов
     /// </summary>
-    public AnalogOutputSettings[] AnalogOutputSettings { get; } = new AnalogOutputSettings[2];
-
-
-
-
-
+    public AnalogOutputSettings[] AnalogOutputSettings { get; } = 
+        Enumerable.Range(0,2).Select(i=> new AnalogOutputSettings()).ToArray();
 
 }
