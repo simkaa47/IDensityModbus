@@ -24,7 +24,7 @@ public class IdensityModbusClient
     public Parity Parity { get; set; }
     private readonly DeviceIndication _deviceIndication = new DeviceIndication();
     private readonly DeviceSettings _deviceSettings = new DeviceSettings();
-    private readonly object _lock = new object();
+    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 
     public IdensityModbusClient(ModbusType modbusType = ModbusType.Rtu,
         string? portName = null,
@@ -38,6 +38,65 @@ public class IdensityModbusClient
         _client = modbusType != ModbusType.Rtu ? _tcpClient : _rtuClient;
     }
 
+    private async Task CommonWriteAsync(ushort[] buffer, ushort offset, ushort count, byte unitId)
+    {
+        await _semaphore.WaitAsync();
+        try
+        {
+            if(!Connected)
+                await ConnectAsync();
+            await _client.WriteMultipleRegistersAsync(unitId, offset, buffer);
+            if (_client is ModbusTcpClient)
+                await DisconnectAsync();
+            
+        }
+        catch(Exception ex)
+        {
+            await DisconnectAsync();
+            throw;
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+
+    private async Task<ushort[]> CommonReadAsync(ushort offset, ushort count, byte unitId, RegisterType registerType)
+    {
+        
+        await _semaphore.WaitAsync();
+        try
+        {
+            if(!Connected)
+                await ConnectAsync();
+            ushort[] buffer;
+            if (registerType == RegisterType.Holding)
+            {
+                var memory = await _client.ReadHoldingRegistersAsync<ushort>(unitId, offset, count)
+                    .ConfigureAwait(false);
+                buffer=memory.ToArray();
+            }
+            else
+            {
+                var memory = await _client.ReadInputRegistersAsync<ushort>(unitId, offset, count)
+                    .ConfigureAwait(false);
+                buffer=memory.ToArray();
+            }
+            if(buffer.Length != count)
+                throw new Exception("Buffer length doesn't match");
+            return buffer;
+        }
+        catch(Exception ex)
+        {
+            await DisconnectAsync();
+            throw;
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+
 
     private async Task  ConnectAsync()
     {
@@ -47,13 +106,13 @@ public class IdensityModbusClient
             {
                 _rtuClient.BaudRate = Baudrate;
                 _rtuClient.Parity = Parity;
-                _rtuClient.Connect(PortName ?? "Unknown port");
+                _rtuClient.Connect(PortName ?? "Unknown port", ModbusEndianness.BigEndian);
                 _client  = _rtuClient;
             }
             else
             {
                 _tcpClient.Disconnect();
-                _tcpClient.Connect(new IPEndPoint(IPAddress.Parse(_ipAddress), _port));
+                _tcpClient.Connect(new IPEndPoint(IPAddress.Parse(_ipAddress), _port), ModbusEndianness.BigEndian);
                 _client = _tcpClient;
             }
         }).ConfigureAwait(false);
@@ -80,62 +139,48 @@ public class IdensityModbusClient
 
     public async Task<DeviceIndication> GetIndicationDataAsync(string ip, byte unitId = 1, int portNum = 502)
     {
-        await SetEthenetSettings(ip, portNum);
-        var indication = await GetIndicationDataAsync(unitId);
-        await DisconnectAsync();
-        return indication;
+        SetEthenetSettings(ip, portNum);
+        return await GetIndicationDataAsync(unitId);
     }
 
     public async Task<DeviceSettings> GetDeviceSettingsAsync(string ip, byte unitId = 1, int portNum = 502)
     {
-        await SetEthenetSettings(ip, portNum);
-        var settings = await GetDeviceSettingsAsync(unitId);
-        await DisconnectAsync();
-        return settings;
+        SetEthenetSettings(ip, portNum);
+        return await GetDeviceSettingsAsync(unitId);
     }
 
-    private async Task SetEthenetSettings(string ip, int portNum)
+    private void SetEthenetSettings(string ip, int portNum)
     {
         ModbusType = ModbusType.Tcp;
         _ipAddress = ip;
         _port = portNum;
-        if (_tcpClient.IsConnected)
-            await DisconnectAsync();
-        
     }
 
     public async Task<DeviceIndication> GetIndicationDataAsync(byte unitId = 1)
     {
-        if (!Connected)
-            await ConnectAsync();
-        var memory =  await _client.ReadInputRegistersAsync<ushort>(unitId, 0, 60)
-            .ConfigureAwait(false);
-        var buffer=memory.ToArray();
-        if (buffer == null || buffer.Length < 60)
-            throw new Exception("Failed to read data from device. Buffer is null or has insufficient length.");
-        GetMeasResults(buffer);
-        GetCommunicationStates(buffer);
-        GetRtc(buffer);
-        GetAnalogOutputs(buffer);
-        GetAnalogInputs(buffer);
-        GetTemBoardTelemetry(buffer);
-        GetHvBoardTelemetry(buffer);
+        var buffer = await CommonReadAsync(0, 60, unitId, RegisterType.Input);
+        buffer.SetMeasResults(_deviceIndication);
+        buffer.SetCommunicationStates(_deviceIndication);
+        buffer.SetRtc(_deviceIndication.Rtc);
+        buffer.SetAnalogOutputs(_deviceIndication);
+        buffer.SetAnalogInputs(_deviceIndication);
+        buffer.SetTemBoardTelemetry(_deviceIndication);
+        buffer.SetHvBoardTelemetry(_deviceIndication);
 
         return _deviceIndication;
     }
 
     public async Task<DeviceSettings> GetDeviceSettingsAsync(byte unitId = 1)
     {
-        if (!Connected)
-            await ConnectAsync();
+        var buffer = await CommonReadAsync(0,10,unitId, RegisterType.Holding);
+        buffer.SetAdcBoardSettings(_deviceSettings);
         return _deviceSettings;
     }
 
     public async Task ClearSpectrumAsync(string ip, byte unitId = 1, int portNum = 502)
     {
-        await SetEthenetSettings(ip, portNum);
+        SetEthenetSettings(ip, portNum);
         await ClearSpectrumAsync(unitId);
-        await DisconnectAsync();
     }
 
     /// <summary>
@@ -144,17 +189,14 @@ public class IdensityModbusClient
     /// <param name="unitId">Адрес в сети Modbus</param>
     public async Task ClearSpectrumAsync(byte unitId = 1)
     {
-        if (!Connected)
-            await ConnectAsync();
-        await _client.WriteSingleRegisterAsync(unitId, 7, 1)
-            .ConfigureAwait(false);
+        var buffer = new ushort[] { 1 };
+        await CommonWriteAsync(buffer, 7, (ushort)buffer.Length, unitId).ConfigureAwait(false);
     }
 
     public async Task SwitchAdcBoardAsync(bool value, string ip, byte unitId = 1, int portNum = 502)
     {
-        await SetEthenetSettings(ip,portNum);
+        SetEthenetSettings(ip,portNum);
         await SwitchAdcBoardAsync(value);
-        await DisconnectAsync();
     }
     
     /// <summary>
@@ -164,17 +206,15 @@ public class IdensityModbusClient
     /// <param name="unitId">Адрес в сети Modbus</param>
     public async Task SwitchAdcBoardAsync(bool value, byte unitId = 1)
     {
-        if (!Connected)
-            await ConnectAsync();
-        await _client.WriteSingleRegisterAsync(unitId, 8, value ? (short)1 : (short)0)
+        var buffer = new ushort[] { value ? (ushort)1 : (ushort)0 };
+        await CommonWriteAsync(buffer, 8, (ushort)buffer.Length, unitId)
             .ConfigureAwait(false);
     }
 
     public async Task StartStopAdcDataAsync(bool value, string ip, byte unitId = 1, int portNum = 502)
     {
-        await SetEthenetSettings(ip, portNum);
+        SetEthenetSettings(ip, portNum);
         await StartStopAdcDataAsync(value);
-        await DisconnectAsync();
     }
 
     /// <summary>
@@ -184,88 +224,9 @@ public class IdensityModbusClient
     /// <param name="unitId">Адрес в сети Modbus</param>
     public async Task StartStopAdcDataAsync(bool value, byte unitId = 1)
     {
-
-        if (!Connected)
-            await ConnectAsync();
-        await _client.WriteSingleRegisterAsync(unitId, 9, value ? (short)1 : (short)0)
+        var buffer = new ushort[] { value ? (ushort)1 : (ushort)0 };
+        await CommonWriteAsync(buffer, 9, (ushort)buffer.Length, unitId)
             .ConfigureAwait(false);
-    }
-
-
-    private void GetMeasResults(ushort[] buffer)
-    {
-        _deviceIndication.IsMeasuringState = buffer[0] != 0;
-        for (int i = 0; i < 2; i++)
-        {
-            _deviceIndication.MeasResults[i].ProcessNumber = buffer[1 + i * 8];
-            _deviceIndication.MeasResults[i].CounterValue = buffer.GetFloat(2 + i * 8);
-            _deviceIndication.MeasResults[i].CurrentValue = buffer.GetFloat(4 + i * 8);
-            _deviceIndication.MeasResults[i].AverageValue = buffer.GetFloat(6 + i * 8);
-            _deviceIndication.MeasResults[i].IsActive = buffer[8 + i * 8] != 0;
-        }
-    }
-
-    private void GetCommunicationStates(ushort[] buffer)
-    {
-        ushort commStates = (ushort)buffer[17];
-        _deviceIndication.AdcBoardConnectState = (commStates & 0x0001) == 0;
-        _deviceIndication.TempBoardTelemetry.BoardConnectingState = (commStates & 0x0002) == 0;
-        _deviceIndication.HvBoardTelemetry.BoardConnectingState = (commStates & 0x0004) == 0;
-    }
-
-    private void GetRtc(ushort[] buffer)
-    {
-        int year = buffer[18]+2000;
-        int month = buffer[19];
-        if (month < 1 || month > 12)
-            return;
-        int day = buffer[20];
-        if (day < 1 || day > DateTime.DaysInMonth(year, month))
-            return;
-        int hour = buffer[21];
-        if (hour < 0 || hour > 23)
-            return;
-        int minute = buffer[22];
-        if (minute < 0 || minute > 59)
-            return;
-        int second = buffer[23];
-        if (second < 0 || second > 59)
-            return;
-        _deviceIndication.Rtc = new DateTime(year, month, day, hour, minute, second);
-    }
-
-    private void GetAnalogOutputs(ushort[] buffer)
-    {
-        int offset = 6;
-        for (int i = 0; i < 2; i++)
-        {
-            _deviceIndication.AnalogOutputIndications[i].PwrState = buffer[32 + i * offset] != 0;
-            _deviceIndication.AnalogOutputIndications[i].CommState = buffer[33 + i * offset] != 0;
-            _deviceIndication.AnalogOutputIndications[i].AdcValue = (ushort)buffer.GetFloat(34 + i * offset);
-            _deviceIndication.AnalogOutputIndications[i].DacValue = (ushort)buffer.GetFloat(36 + i * offset);
-        }
-    }
-
-    private void GetAnalogInputs(ushort[] buffer)
-    {
-        int offset = 6;
-        for (int i = 0; i < 2; i++)
-        {
-            _deviceIndication.AnalogInputIndications[i].PwrState = buffer[44 + i * offset] != 0;
-            _deviceIndication.AnalogInputIndications[i].CommState = buffer[45 + i * offset] != 0;
-            _deviceIndication.AnalogInputIndications[i].AdcValue = (ushort)buffer.GetFloat(46 + i * offset);
-        }
-    }
-
-    private void GetTemBoardTelemetry(ushort[] buffer)
-    {
-        _deviceIndication.TempBoardTelemetry.Temperature = buffer.GetFloat(24) / 10;
-    }
-
-    private void GetHvBoardTelemetry(ushort[] buffer)
-    {
-        _deviceIndication.HvBoardTelemetry.InputVoltage = buffer.GetFloat(28);
-        _deviceIndication.HvBoardTelemetry.OutputVoltage = buffer.GetFloat(30);
     }
 
     public async Task WriteMeasProcessAsync(MeasProcess process, int processNum, 
@@ -449,9 +410,5 @@ public class IdensityModbusClient
     {
         await Task.Delay(100);
     }
-
-
-
-
 
 }

@@ -19,6 +19,14 @@
                <TextBlock Text="{Binding DeviceService.Device.Voltage.Value}"
                           HorizontalAlignment="Right"/>
            </DockPanel>
+           <DockPanel>
+               <TextBlock Text="{Binding DeviceService.Device.AdcBoardSettings.TimerAdc.Description}"/>
+               <TextBlock Text="{Binding DeviceService.Device.AdcBoardSettings.TimerAdc.Value}"
+                          HorizontalAlignment="Right"/>
+           </DockPanel>
+           <Button HorizontalAlignment="Stretch"
+                   Command="{Binding StartStopAdcDataCommand}"
+                   Content="Переключить разрешение на отправку данных АЦП"/>
        </ListBox>
    </Grid>
 </Window>

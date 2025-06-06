@@ -30,5 +30,9 @@ public class AdcBoardSettings
     /// Уставка платы HV
     /// </summary>
     public ushort HvSv { get; internal set; }
+    /// <summary>
+    /// Разрешение на выжачу данных АЦП
+    /// </summary>
+    public bool AdcDataSendEnabled { get; internal set; }
 
 }
