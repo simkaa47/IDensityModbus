@@ -1,6 +1,7 @@
 ﻿using Idensity.Modbus.Services;
 using Kinef.Core.Models.Main;
 using Microsoft.Extensions.Logging;
+using AdcBoardSettings = Idensity.Modbus.Models.Settings.AdcSettings.AdcBoardSettings;
 
 namespace Kinef.Core.Services
 {
@@ -42,6 +43,20 @@ namespace Kinef.Core.Services
                     _logger.LogError(ex, "Ошибка при получении данных с устройства");
                 }
                 
+            }
+        }
+
+        public async Task WriteTimerAdcAsync(ushort value)
+        {
+            try
+            {
+                var settings = new AdcBoardSettings();
+                settings.TimerSendData = value;
+                await _client.WriteAdcBoardSettingsAsync(settings, "127.0.0.1", 1);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
             }
         }
 

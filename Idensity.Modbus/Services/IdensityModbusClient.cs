@@ -137,16 +137,16 @@ public class IdensityModbusClient
         }
     }
 
-    public async Task<DeviceIndication> GetIndicationDataAsync(string ip, byte unitId = 1, int portNum = 502)
+    public Task<DeviceIndication> GetIndicationDataAsync(string ip, byte unitId = 1, int portNum = 502)
     {
         SetEthenetSettings(ip, portNum);
-        return await GetIndicationDataAsync(unitId);
+        return GetIndicationDataAsync(unitId);
     }
 
-    public async Task<DeviceSettings> GetDeviceSettingsAsync(string ip, byte unitId = 1, int portNum = 502)
+    public Task<DeviceSettings> GetDeviceSettingsAsync(string ip, byte unitId = 1, int portNum = 502)
     {
         SetEthenetSettings(ip, portNum);
-        return await GetDeviceSettingsAsync(unitId);
+        return  GetDeviceSettingsAsync(unitId);
     }
 
     private void SetEthenetSettings(string ip, int portNum)
@@ -172,31 +172,32 @@ public class IdensityModbusClient
 
     public async Task<DeviceSettings> GetDeviceSettingsAsync(byte unitId = 1)
     {
-        var buffer = await CommonReadAsync(0,10,unitId, RegisterType.Holding);
-        buffer.SetAdcBoardSettings(_deviceSettings);
+        var buffer = await CommonReadAsync(0,125,unitId, RegisterType.Holding);
+        buffer.SetAdcBoardSettings(_deviceSettings.AdcBoardSettings);
+        buffer.SetCounterSettings(_deviceSettings);
         return _deviceSettings;
     }
 
-    public async Task ClearSpectrumAsync(string ip, byte unitId = 1, int portNum = 502)
+    public Task ClearSpectrumAsync(string ip, byte unitId = 1, int portNum = 502)
     {
         SetEthenetSettings(ip, portNum);
-        await ClearSpectrumAsync(unitId);
+        return ClearSpectrumAsync(unitId);
     }
 
     /// <summary>
     /// Очистить спектр
     /// </summary>
     /// <param name="unitId">Адрес в сети Modbus</param>
-    public async Task ClearSpectrumAsync(byte unitId = 1)
+    public Task ClearSpectrumAsync(byte unitId = 1)
     {
         var buffer = new ushort[] { 1 };
-        await CommonWriteAsync(buffer, 7, (ushort)buffer.Length, unitId).ConfigureAwait(false);
+        return CommonWriteAsync(buffer, 18, (ushort)buffer.Length, unitId);
     }
 
-    public async Task SwitchAdcBoardAsync(bool value, string ip, byte unitId = 1, int portNum = 502)
+    public Task SwitchAdcBoardAsync(bool value, string ip, byte unitId = 1, int portNum = 502)
     {
         SetEthenetSettings(ip,portNum);
-        await SwitchAdcBoardAsync(value);
+        return SwitchAdcBoardAsync(value);
     }
     
     /// <summary>
@@ -204,17 +205,16 @@ public class IdensityModbusClient
     /// </summary>
     /// <param name="value">0 - Остановить, 1 -запустить</param>
     /// <param name="unitId">Адрес в сети Modbus</param>
-    public async Task SwitchAdcBoardAsync(bool value, byte unitId = 1)
+    public Task SwitchAdcBoardAsync(bool value, byte unitId = 1)
     {
         var buffer = new ushort[] { value ? (ushort)1 : (ushort)0 };
-        await CommonWriteAsync(buffer, 8, (ushort)buffer.Length, unitId)
-            .ConfigureAwait(false);
+        return CommonWriteAsync(buffer, 19, (ushort)buffer.Length, unitId);
     }
 
-    public async Task StartStopAdcDataAsync(bool value, string ip, byte unitId = 1, int portNum = 502)
+    public Task StartStopAdcDataAsync(bool value, string ip, byte unitId = 1, int portNum = 502)
     {
         SetEthenetSettings(ip, portNum);
-        await StartStopAdcDataAsync(value);
+         return StartStopAdcDataAsync(value);
     }
 
     /// <summary>
@@ -222,11 +222,27 @@ public class IdensityModbusClient
     /// </summary>
     /// <param name="value">0 - Остановить, 1 -запустить</param>
     /// <param name="unitId">Адрес в сети Modbus</param>
-    public async Task StartStopAdcDataAsync(bool value, byte unitId = 1)
+    public Task StartStopAdcDataAsync(bool value, byte unitId = 1)
     {
         var buffer = new ushort[] { value ? (ushort)1 : (ushort)0 };
-        await CommonWriteAsync(buffer, 9, (ushort)buffer.Length, unitId)
-            .ConfigureAwait(false);
+        return CommonWriteAsync(buffer, 20, (ushort)buffer.Length, unitId);
+    }
+
+    public Task SwitcHvAsync(bool value, string ip, byte unitId = 1, int portNum = 502)
+    {
+        SetEthenetSettings(ip, portNum);
+        return SwitcHvAsync(value, unitId);
+    }
+    
+    /// <summary>
+    /// Команду управления HV
+    /// </summary>
+    /// <param name="value">0 - Выкл, 1 - Вкл</param>
+    /// <param name="unitId">Адрес в сети Modbus</param>
+    public Task SwitcHvAsync(bool value, byte unitId = 1)
+    {
+        var buffer = new ushort[] { value ? (ushort)1 : (ushort)0 };
+        return CommonWriteAsync(buffer, 21, (ushort)buffer.Length, unitId);
     }
 
     public async Task WriteMeasProcessAsync(MeasProcess process, int processNum, 
@@ -257,10 +273,11 @@ public class IdensityModbusClient
     /// <param name="unitId">Адрес в сети Modbus</param>
     /// <param name="portNum">Номер порта (default 502)</param>
     /// <returns></returns>
-    public async Task WriteCounterAsync(CounterSettings counterSettings, int counterNum,
+    public Task WriteCounterAsync(CounterSettings counterSettings, int counterNum,
        string ip, byte unitId = 1, int portNum = 502)
     {
-        await Task.Delay(100);
+        SetEthenetSettings(ip, portNum);
+        return WriteCounterAsync(counterSettings, counterNum, unitId);
     }
 
     /// <summary>
@@ -270,10 +287,12 @@ public class IdensityModbusClient
     /// <param name="counterNum">Номер диапазона</param>
     /// <param name="unitId">Адрес в сети Modbus</param>
     /// <returns></returns>
-    public async Task WriteCounterAsync(CounterSettings counterSettings, int counterNum,
+    public Task WriteCounterAsync(CounterSettings counterSettings, int counterNum,
        byte unitId = 1)
     {
-        await Task.Delay(100);
+        ushort startIndex = 0;
+        var buffer = counterSettings.GetRegisters(counterNum, ref startIndex);
+        return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
     }
 
     public async Task WriteModbusNumberAsync(byte modbusNum, string ip, byte unitId = 1, int portNum = 502)
@@ -324,9 +343,10 @@ public class IdensityModbusClient
         await Task.Delay(100);
     }
 
-    public async Task WriteAdcBoardSettingsAsync(AdcBoardSettings settings, string ip, byte unitId = 1, int portNum = 502)
+    public Task WriteAdcBoardSettingsAsync(AdcBoardSettings settings, string ip, byte unitId = 1, int portNum = 502)
     {
-        await Task.Delay(100);
+        SetEthenetSettings(ip, portNum);
+        return WriteAdcBoardSettingsAsync(settings, unitId);
     }
 
     /// <summary>
@@ -335,9 +355,11 @@ public class IdensityModbusClient
     /// <param name="settings"></param>
     /// <param name="unitId"></param>
     /// <returns></returns>
-    public async Task WriteAdcBoardSettingsAsync(AdcBoardSettings settings, byte unitId = 1)
+    public  Task WriteAdcBoardSettingsAsync(AdcBoardSettings settings, byte unitId = 1)
     {
-        await Task.Delay(100);
+        ushort startIndex = 0;
+        var buffer = settings.GetRegisters(ref startIndex);
+        return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
     }
 
     public async Task SetAnalogInputActivityAsync(byte inputNumber, string ip, byte unitId = 1, int portNum = 502)

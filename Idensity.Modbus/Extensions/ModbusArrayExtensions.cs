@@ -91,13 +91,6 @@ namespace Idensity.Modbus.Extensions
             deviceIndication.HvBoardTelemetry.OutputVoltage = buffer.GetFloat(30);
         }
 
-        internal static void SetAdcBoardSettings(this ushort[] buffer, DeviceSettings settings)
-        {
-            settings.AdcBoardSettings.Mode = (AdcBoardMode)buffer[1];
-            settings.AdcBoardSettings.SyncLevel = buffer[3];
-            settings.AdcBoardSettings.TimerSendData = buffer[5];
-            settings.AdcBoardSettings.Gain = (byte)buffer[6];
-            settings.AdcBoardSettings.AdcDataSendEnabled = buffer[9]!=0;
-        }
+        
     }
 }

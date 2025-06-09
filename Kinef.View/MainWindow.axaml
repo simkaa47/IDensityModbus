@@ -27,6 +27,9 @@
            <Button HorizontalAlignment="Stretch"
                    Command="{Binding StartStopAdcDataCommand}"
                    Content="Переключить разрешение на отправку данных АЦП"/>
+           <Button HorizontalAlignment="Stretch"
+                   Command="{Binding SendTimerCommand}"
+                   Content="Отправить таймер"/>
        </ListBox>
    </Grid>
 </Window>

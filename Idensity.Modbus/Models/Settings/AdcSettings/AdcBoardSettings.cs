@@ -5,19 +5,19 @@ public class AdcBoardSettings
     /// <summary>
     /// Режим работы платы АЦП устройства.
     /// </summary>
-    public AdcBoardMode Mode { get; internal set; }
+    public AdcBoardMode Mode { get; set; }
     /// <summary>
     /// Уровень синхронизации
     /// </summary>
-    public ushort SyncLevel { get; internal set; }
+    public ushort SyncLevel { get; set; }
     /// <summary>
     /// Таймер выдачи данных платы АЦП, мс
     /// </summary>
-    public ushort TimerSendData { get; internal set; } = 200;
+    public ushort TimerSendData { get; set; } = 200;
     /// <summary>
     /// Коэффициент платы предусиления
     /// </summary>
-    public byte Gain { get; internal set; }
+    public byte Gain { get; set; }
     /// <summary>
     /// Порт UDP для передачи данных платы АЦП
     /// </summary>
@@ -33,6 +33,6 @@ public class AdcBoardSettings
     /// <summary>
     /// Разрешение на выжачу данных АЦП
     /// </summary>
-    public bool AdcDataSendEnabled { get; internal set; }
+    public bool AdcDataSendEnabled { get; set; }
 
 }
