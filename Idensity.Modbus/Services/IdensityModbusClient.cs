@@ -177,6 +177,7 @@ public class IdensityModbusClient
         buffer.SetCounterSettings(_deviceSettings);
         buffer.SetModbusAddr(_deviceSettings);
         buffer.SetEthernetSettings(_deviceSettings);
+        buffer.SetSerialSettings(_deviceSettings.SerialSettings);
         return _deviceSettings;
     }
 
@@ -333,9 +334,10 @@ public class IdensityModbusClient
         return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
     }
 
-    public async Task WriteSerialSettingsAsync(SerialSettings settings, string ip, byte unitId = 1, int portNum = 502)
+    public Task WriteSerialSettingsAsync(SerialSettings settings, string ip, byte unitId = 1, int portNum = 502)
     {
-        await Task.Delay(100);
+        SetEthenetSettings(ip, portNum);
+        return WriteSerialSettingsAsync(settings, unitId);
     }
 
     /// <summary>
@@ -344,9 +346,11 @@ public class IdensityModbusClient
     /// <param name="settings">Настройки</param>
     /// <param name="unitId">Адрес в сети Modbus</param>
     /// <returns></returns>
-    public async Task WriteSerialSettingsAsync(SerialSettings settings, byte unitId = 1)
+    public Task WriteSerialSettingsAsync(SerialSettings settings, byte unitId = 1)
     {
-        await Task.Delay(100);
+        ushort startIndex = 0;
+        var buffer = settings.GetRegisters(ref startIndex);
+        return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
     }
 
     public Task WriteAdcBoardSettingsAsync(AdcBoardSettings settings, string ip, byte unitId = 1, int portNum = 502)

@@ -14,6 +14,35 @@ namespace Idensity.Modbus.Extensions
                 .ToArray();
             return BitConverter.ToSingle(bytes);
         }
+        
+        public static uint GetUint(this ushort[] arr, int index)
+        {
+            var bytes = arr.Skip(index)
+                .Select(x => (ushort)x)
+                .SelectMany(BitConverter.GetBytes)
+                .ToArray();
+            return BitConverter.ToUInt32(bytes);
+        }
+
+        public static ushort[] GetRegisters(this float value)
+        {
+            var bytes = BitConverter.GetBytes(value);
+            return
+            [
+                BitConverter.ToUInt16(bytes,0),
+                BitConverter.ToUInt16(bytes,2),
+            ];
+        }
+        
+        public static ushort[] GetRegisters(this uint value)
+        {
+            var bytes = BitConverter.GetBytes(value);
+            return
+            [
+                BitConverter.ToUInt16(bytes,0),
+                BitConverter.ToUInt16(bytes,2),
+            ];
+        }
 
         internal static DateTime SetRtc(this ushort[] arr,  DateTime time)
         {
