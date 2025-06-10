@@ -35,5 +35,4 @@ internal static class AdcBoardSettingsExtensions
         ];
     }
     
-    
 }

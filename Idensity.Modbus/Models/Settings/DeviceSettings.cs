@@ -18,7 +18,7 @@ public class DeviceSettings
     /// <summary>
     /// Адрес устройства в сети Modbus.
     /// </summary>
-    public byte ModbusId { get; internal set; }
+    public byte ModbusId { get; set; }
     /// <summary>
     /// Настройки Ethernet соединения устройства.
     /// </summary>
@@ -26,11 +26,11 @@ public class DeviceSettings
     /// <summary>
     /// Контрольная сумма ПО
     /// </summary>
-    public uint CheckSum { get; internal set; }
+    public uint CheckSum { get; set; }
     /// <summary>
     /// Длина уровнемера,мм
     /// </summary>
-    public float LevelLength { get; internal set; }
+    public float LevelLength { get; set; }
     /// <summary>
     /// Натсройки компенсации температуры
     /// </summary>
@@ -43,11 +43,11 @@ public class DeviceSettings
     /// <summary>
     /// Номер проекта
     /// </summary>
-    public string ProjectNumber { get; internal set; } = string.Empty;
+    public string ProjectNumber { get; set; } = string.Empty;
     /// <summary>
     /// Версия встроенного ПО
     /// </summary>
-    public string FwVersion { get; internal set; } = string.Empty;
+    public string FwVersion { get; set; } = string.Empty;
     /// <summary>
     /// Настройки последовательного соединения устройства
     /// </summary>

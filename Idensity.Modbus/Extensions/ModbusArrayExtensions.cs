@@ -91,6 +91,9 @@ namespace Idensity.Modbus.Extensions
             deviceIndication.HvBoardTelemetry.OutputVoltage = buffer.GetFloat(30);
         }
 
-        
+        internal static void SetModbusAddr(this ushort[] buffer, DeviceSettings settings)
+        {
+            settings.ModbusId = (byte)buffer[0];
+        }
     }
 }

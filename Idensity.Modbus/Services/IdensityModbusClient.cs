@@ -175,6 +175,8 @@ public class IdensityModbusClient
         var buffer = await CommonReadAsync(0,125,unitId, RegisterType.Holding);
         buffer.SetAdcBoardSettings(_deviceSettings.AdcBoardSettings);
         buffer.SetCounterSettings(_deviceSettings);
+        buffer.SetModbusAddr(_deviceSettings);
+        buffer.SetEthernetSettings(_deviceSettings);
         return _deviceSettings;
     }
 
@@ -295,9 +297,10 @@ public class IdensityModbusClient
         return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
     }
 
-    public async Task WriteModbusNumberAsync(byte modbusNum, string ip, byte unitId = 1, int portNum = 502)
+    public Task WriteModbusNumberAsync(byte modbusNum, string ip, byte unitId = 1, int portNum = 502)
     {
-        await Task.Delay(100);
+        SetEthenetSettings(ip, portNum);
+        return WriteModbusNumberAsync(modbusNum, unitId);
     }
 
     /// <summary>
@@ -306,14 +309,15 @@ public class IdensityModbusClient
     /// <param name="modbusNum">Новый адрес</param>
     /// <param name="unitId">Адрес в сети Modbus</param>
     /// <returns></returns>
-    public async Task WriteModbusNumberAsync(byte modbusNum, byte unitId = 1)
+    public Task WriteModbusNumberAsync(byte modbusNum, byte unitId = 1)
     {
-        await Task.Delay(100);
+       return CommonWriteAsync([modbusNum], 0, 1, unitId);
     }
 
-    public async Task WriteEthernetSettingsAsync(TcpSettings settings, string ip, byte unitId = 1, int portNum = 502)
+    public Task WriteEthernetSettingsAsync(TcpSettings settings, string ip, byte unitId = 1, int portNum = 502)
     {
-        await Task.Delay(100);
+        SetEthenetSettings(ip, portNum);
+        return WriteEthernetSettingsAsync(settings, unitId);
     }
 
     /// <summary>
@@ -322,9 +326,11 @@ public class IdensityModbusClient
     /// <param name="settings">Настройки</param>
     /// <param name="unitId">Адрес в сети Modbus</param>
     /// <returns></returns>
-    public async Task WriteEthernetSettingsAsync(TcpSettings settings, byte unitId = 1)
+    public Task WriteEthernetSettingsAsync(TcpSettings settings, byte unitId = 1)
     {
-        await Task.Delay(100);
+        ushort startIndex = 0;
+        var buffer = settings.GetRegisters(ref startIndex);
+        return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
     }
 
     public async Task WriteSerialSettingsAsync(SerialSettings settings, string ip, byte unitId = 1, int portNum = 502)
