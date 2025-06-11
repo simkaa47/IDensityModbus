@@ -5,36 +5,41 @@ public class AnalogOutputSettings
     /// <summary>
     /// Активность выхода
     /// </summary>
-    public bool IsActive { get; internal set; }
+    public bool IsActive { get; set; }
     /// <summary>
     /// Режим работы аналогового выхода.
     /// </summary>
-    public AnalogOutputMode Mode { get; internal set; }
+    public AnalogOutputMode Mode { get; set; }
     /// <summary>
     /// Номер изм процесса
     /// </summary>
-    public byte MeasProcessNum { get; internal set; }
+    public byte MeasProcessNum { get; set; }
     /// <summary>
     /// Что выводить на выход
     /// </summary>
-    public AnalogOutMeasType AnalogOutMeasType { get; internal set; }
+    public AnalogOutMeasType AnalogOutMeasType { get; set; }
     /// <summary>
     /// Нижний предел переменной
     /// </summary>
-    public float MinValue { get; internal set; }
+    public float MinValue { get; set; }
     /// <summary>
     /// Верхний предел переменной
     /// </summary>
-    public float MaxValue { get; internal set; }
+    public float MaxValue { get; set; }
     /// <summary>
     /// Минимальное значение тока, мА
     /// </summary>
-    public float MinCurrent { get; internal set; }
+    public float MinCurrent { get; set; }
 
     /// <summary>
     /// Максимальное значение тока, мА
     /// </summary>
-    public float MaxCurrent { get; internal set; }
+    public float MaxCurrent { get; set; }
+    
+    /// <summary>
+    /// Тестовое значение, mA
+    /// </summary>
+    public float TestValue { get; set; }
 
 
 }

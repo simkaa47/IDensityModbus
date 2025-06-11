@@ -86,20 +86,6 @@ namespace Idensity.Modbus.Extensions
             deviceIndication.HvBoardTelemetry.BoardConnectingState = (commStates & 0x0004) == 0;
         }
 
-        internal static void SetAnalogOutputs(this ushort[] buffer, DeviceIndication deviceIndication)
-        {
-            const int offset = 6;
-            for (int i = 0; i < 2; i++)
-            {
-                deviceIndication.AnalogOutputIndications[i].PwrState = buffer[32 + i * offset] != 0;
-                deviceIndication.AnalogOutputIndications[i].CommState = buffer[33 + i * offset] != 0;
-                deviceIndication.AnalogOutputIndications[i].AdcValue = (ushort)buffer.GetFloat(34 + i * offset);
-                deviceIndication.AnalogOutputIndications[i].DacValue = (ushort)buffer.GetFloat(36 + i * offset);
-            }
-        }
-
-        
-
         internal static void SetTemBoardTelemetry(this ushort[] buffer, DeviceIndication deviceIndication)
         {
             deviceIndication.TempBoardTelemetry.Temperature = buffer.GetFloat(24) / 10;

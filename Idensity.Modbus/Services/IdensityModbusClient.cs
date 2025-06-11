@@ -162,7 +162,7 @@ public class IdensityModbusClient
         buffer.SetMeasResults(_deviceIndication);
         buffer.SetCommunicationStates(_deviceIndication);
         buffer.SetRtc(_deviceIndication.Rtc);
-        buffer.SetAnalogOutputs(_deviceIndication);
+        buffer.SetAnalogOutputsIndication(_deviceIndication);
         buffer.SetAnalogInputsIndication(_deviceIndication);
         buffer.SetTemBoardTelemetry(_deviceIndication);
         buffer.SetHvBoardTelemetry(_deviceIndication);
@@ -179,6 +179,7 @@ public class IdensityModbusClient
         buffer.SetEthernetSettings(_deviceSettings);
         buffer.SetSerialSettings(_deviceSettings.SerialSettings);
         buffer.SetAnalogInputSettings(_deviceSettings);
+        buffer.SetAnalogOutputSettings(_deviceSettings);
         return _deviceSettings;
     }
 
@@ -394,10 +395,11 @@ public class IdensityModbusClient
         return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId); 
     }
     
-    public async Task WriteAnalogOutputSettingsAsync(AnalogOutputSettings settings, byte outputNumber,  
+    public Task WriteAnalogOutputSettingsAsync(AnalogOutputSettings settings, byte outputNumber,  
         string ip, byte unitId = 1, int portNum = 502)
     {
-        await Task.Delay(100);
+        SetEthenetSettings(ip, portNum);
+        return WriteAnalogOutputSettingsAsync(settings, outputNumber, unitId);
     }
 
 
@@ -408,15 +410,18 @@ public class IdensityModbusClient
     /// <param name="outputNumber">Номер выхода (0,1)</param>
     /// <param name="unitId">Адрес в сети Modbus</param>
     /// <returns></returns>
-    public async Task WriteAnalogOutputSettingsAsync(AnalogOutputSettings settings, byte outputNumber, 
+    public Task WriteAnalogOutputSettingsAsync(AnalogOutputSettings settings, byte outputNumber, 
         byte unitId = 1)
     {
-        await Task.Delay(100);
+        ushort startIndex = 0;
+        var buffer = settings.GetRegisters(outputNumber, ref startIndex);
+        return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId); 
     }
 
-    public async Task CmdSwitchAnalogOutputAsync(byte outputNumber, bool value, string ip, byte unitId = 1, int portNum = 502)
+    public Task SetAnalogOutputActivityAsync(byte outputNumber, bool value, string ip, byte unitId = 1, int portNum = 502)
     {
-        await Task.Delay(100);
+        SetEthenetSettings(ip, portNum);
+        return SetAnalogOutputActivityAsync(outputNumber, value, unitId);
     }
 
     /// <summary>
@@ -426,9 +431,32 @@ public class IdensityModbusClient
     /// <param name="value"></param>
     /// <param name="unitId"></param>
     /// <returns></returns>
-    public async Task CmdSwitchAnalogOutputAsync(byte outputNumber, bool value, byte unitId = 1)
+    public Task SetAnalogOutputActivityAsync(byte outputNumber, bool value, byte unitId = 1)
     {
-        await Task.Delay(100);
+        ushort startIndex = 0;
+        var buffer = AnalogModulesExtensions.SwitchAnalogOutputsPwr(outputNumber, value, ref startIndex);
+        return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId); 
+    }
+
+    public Task SendAnalogTestValue(byte outNum, float testValue, string ip, byte unitId = 1, int portNum = 502)
+    {
+        SetEthenetSettings(ip, portNum);
+        return SendAnalogTestValue(outNum, testValue, unitId);
+    }
+
+
+    /// <summary>
+    /// Отправить тестовое значение аналогового выхода
+    /// </summary>
+    /// <param name="outNum">Номер выхода (0,1)</param>
+    /// <param name="testValue">Ток, в mA</param>
+    /// <param name="unitId">Адрес в сети Modbus</param>
+    /// <returns></returns>
+    public Task SendAnalogTestValue(byte outNum, float testValue, byte unitId = 1)
+    {
+        ushort startIndex = 0;
+        var buffer = AnalogModulesExtensions.SendTestValue(outNum, testValue, ref startIndex);
+        return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId); 
     }
 
 }
