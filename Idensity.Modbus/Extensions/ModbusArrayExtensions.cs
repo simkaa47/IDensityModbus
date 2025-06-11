@@ -98,16 +98,7 @@ namespace Idensity.Modbus.Extensions
             }
         }
 
-        internal static void SetAnalogInputs(this ushort[] buffer, DeviceIndication deviceIndication)
-        {
-            const int offset = 6;
-            for (int i = 0; i < 2; i++)
-            {
-                deviceIndication.AnalogInputIndications[i].PwrState = buffer[44 + i * offset] != 0;
-                deviceIndication.AnalogInputIndications[i].CommState = buffer[45 + i * offset] != 0;
-                deviceIndication.AnalogInputIndications[i].AdcValue = (ushort)buffer.GetFloat(46 + i * offset);
-            }
-        }
+        
 
         internal static void SetTemBoardTelemetry(this ushort[] buffer, DeviceIndication deviceIndication)
         {
