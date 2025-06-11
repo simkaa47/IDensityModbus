@@ -6,6 +6,11 @@ namespace Idensity.Modbus.Models.Settings;
 public class DeviceSettings
 {
     /// <summary>
+    /// Тип прибора
+    /// </summary>
+    public DeviceType DeviceType { get; set; }
+    
+    /// <summary>
     /// Данные измерительных процессов
     /// </summary>
     public List<MeasProcess> MeasProcesses { get;} = Enumerable

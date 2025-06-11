@@ -180,6 +180,9 @@ public class IdensityModbusClient
         buffer.SetSerialSettings(_deviceSettings.SerialSettings);
         buffer.SetAnalogInputSettings(_deviceSettings);
         buffer.SetAnalogOutputSettings(_deviceSettings);
+        _deviceSettings.DeviceType = (DeviceType)buffer[102];
+        _deviceSettings.LevelLength = buffer.GetFloat(112);
+        buffer.SetTemperatureCompensationSettings(_deviceSettings.GetTemperature);
         return _deviceSettings;
     }
 
@@ -438,10 +441,10 @@ public class IdensityModbusClient
         return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId); 
     }
 
-    public Task SendAnalogTestValue(byte outNum, float testValue, string ip, byte unitId = 1, int portNum = 502)
+    public Task SendAnalogTestValueAsync(byte outNum, float testValue, string ip, byte unitId = 1, int portNum = 502)
     {
         SetEthenetSettings(ip, portNum);
-        return SendAnalogTestValue(outNum, testValue, unitId);
+        return SendAnalogTestValueAsync(outNum, testValue, unitId);
     }
 
 
@@ -452,11 +455,69 @@ public class IdensityModbusClient
     /// <param name="testValue">Ток, в mA</param>
     /// <param name="unitId">Адрес в сети Modbus</param>
     /// <returns></returns>
-    public Task SendAnalogTestValue(byte outNum, float testValue, byte unitId = 1)
+    public Task SendAnalogTestValueAsync(byte outNum, float testValue, byte unitId = 1)
     {
         ushort startIndex = 0;
         var buffer = AnalogModulesExtensions.SendTestValue(outNum, testValue, ref startIndex);
         return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId); 
+    }
+
+    public Task WriteDeviceTypeAsync(DeviceType type, string ip, byte unitId = 1, int portNum = 502)
+    {
+        SetEthenetSettings(ip, portNum);
+        return WriteDeviceTypeAsync(type, unitId);
+    }
+
+
+    /// <summary>
+    /// Изменить тип прибора
+    /// </summary>
+    /// <param name="type"></param>
+    /// <param name="unitId"></param>
+    /// <returns></returns>
+    public Task WriteDeviceTypeAsync(DeviceType type, byte unitId = 1)
+    {
+        return CommonWriteAsync([(ushort)type], 102, 1, unitId);
+    }
+
+    public Task WriteTempCompensationSettingsAsync(GetTemperature settings, string ip, byte unitId = 1,
+        int portNum = 502)
+    {
+        SetEthenetSettings(ip, portNum);
+        return WriteTempCompensationSettingsAsync(settings, unitId);
+    }
+
+
+    /// <summary>
+    /// Записать настройки компенсации температуры
+    /// </summary>
+    /// <param name="settings"></param>
+    /// <param name="unitId"></param>
+    /// <returns></returns>
+    public Task WriteTempCompensationSettingsAsync(GetTemperature settings, byte unitId = 1)
+    {
+        ushort startIndex = 0;
+        var buffer = settings.GetRegisters(ref startIndex);
+        return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId); 
+    }
+
+    public Task WriteLevelLengthAsync(float levelLength, string ip, byte unitId = 1,
+        int portNum = 502)
+    {
+        SetEthenetSettings(ip, portNum);
+        return WriteLevelLengthAsync(levelLength, unitId);
+    }
+
+
+    /// <summary>
+    /// Записать длину уровнемера, мм
+    /// </summary>
+    /// <param name="levelLength"></param>
+    /// <param name="unitId"></param>
+    /// <returns></returns>
+    public Task WriteLevelLengthAsync(float levelLength,  byte unitId = 1)
+    {
+        return CommonWriteAsync([..levelLength.GetRegisters()], 112, 2, unitId); 
     }
 
 }
