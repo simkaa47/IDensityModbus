@@ -161,7 +161,7 @@ public class IdensityModbusClient
         var buffer = await CommonReadAsync(0, 60, unitId, RegisterType.Input);
         buffer.SetMeasResults(_deviceIndication);
         buffer.SetCommunicationStates(_deviceIndication);
-        buffer.SetRtc(_deviceIndication.Rtc);
+        _deviceIndication.Rtc = buffer.SetRtc(_deviceIndication.Rtc);
         buffer.SetAnalogOutputsIndication(_deviceIndication);
         buffer.SetAnalogInputsIndication(_deviceIndication);
         buffer.SetTemBoardTelemetry(_deviceIndication);

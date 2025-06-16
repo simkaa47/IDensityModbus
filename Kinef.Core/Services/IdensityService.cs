@@ -1,4 +1,5 @@
-﻿using Idensity.Modbus.Services;
+﻿using Idensity.Modbus.Models.Modbus;
+using Idensity.Modbus.Services;
 using Kinef.Core.Models.Main;
 using Microsoft.Extensions.Logging;
 using AdcBoardSettings = Idensity.Modbus.Models.Settings.AdcSettings.AdcBoardSettings;
@@ -8,12 +9,12 @@ namespace Kinef.Core.Services
     public class IdensityService
     {
         public Device Device { get; } = new Device();
-        private IdensityModbusClient _client = new IdensityModbusClient();
+        private IdensityModbusClient _client = new IdensityModbusClient(ModbusType.Rtu, "COM4");
         private readonly ILogger<IdensityService> _logger;
 
         public Task SwitchAdcDataSendAsync()
         {
-            return _client.StartStopAdcDataAsync(!Device.AdcBoardSettings.AdcSendEnabled.Value, "127.0.0.1");
+            return _client.StartStopAdcDataAsync(!Device.AdcBoardSettings.AdcSendEnabled.Value);
         }
 
         public IdensityService(ILogger<IdensityService> logger)
@@ -28,10 +29,10 @@ namespace Kinef.Core.Services
             {
                 try
                 {
-                    var indication = await _client.GetIndicationDataAsync("127.0.0.1");
+                    var indication = await _client.GetIndicationDataAsync();
                     Device.Temperature.Value = indication.TempBoardTelemetry.Temperature;
                     Device.Voltage.Value = indication.HvBoardTelemetry.OutputVoltage;
-                    var settings = await _client.GetDeviceSettingsAsync("127.0.0.1");
+                    var settings = await _client.GetDeviceSettingsAsync();
                     Device.AdcBoardSettings.SyncLevel.Value = settings.AdcBoardSettings.SyncLevel;
                     Device.AdcBoardSettings.AdcSendEnabled.Value = settings.AdcBoardSettings.AdcDataSendEnabled;
                     Device.AdcBoardSettings.PreampGain.Value = settings.AdcBoardSettings.Gain;

@@ -7,7 +7,7 @@
 		<Authors>Serafim</Authors>
 		<PackageId>IDensity.Modbus</PackageId>
 		<RepositoryUrl>https://github.com/simkaa47/IDensityModbus</RepositoryUrl>
-		<Version>0.0.4.1</Version>
+		<Version>0.0.4.3</Version>
 		<Description>A package for reading IDensity via Modbus</Description>
 		<Company>Konvels Automation LDT</Company>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
