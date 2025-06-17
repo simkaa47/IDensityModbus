@@ -21,7 +21,7 @@ public class AdcBoardSettings
     /// <summary>
     /// Порт UDP для передачи данных платы АЦП
     /// </summary>
-    public ushort UdpPort { get; internal set; }
+    public ushort UdpPort { get;  set; }
     /// <summary>
     /// Адрес для передачи данных платы АЦП по UDP, 4 байта
     /// </summary>
@@ -29,7 +29,7 @@ public class AdcBoardSettings
     /// <summary>
     /// Уставка платы HV
     /// </summary>
-    public ushort HvSv { get; internal set; }
+    public ushort HvSv { get;  set; }
     /// <summary>
     /// Разрешение на выжачу данных АЦП
     /// </summary>

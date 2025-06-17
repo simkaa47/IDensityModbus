@@ -30,6 +30,7 @@
            <Button HorizontalAlignment="Stretch"
                    Command="{Binding SendTimerCommand}"
                    Content="Отправить таймер"/>
+            <TextBlock Text="{Binding DeviceService.IndicationString}"/>
        </ListBox>
    </Grid>
 </Window>

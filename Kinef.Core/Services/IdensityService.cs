@@ -1,4 +1,7 @@
-﻿using Idensity.Modbus.Models.Modbus;
+﻿using System.Diagnostics;
+using System.Text.Json;
+using CommunityToolkit.Mvvm.ComponentModel;
+using Idensity.Modbus.Models.Modbus;
 using Idensity.Modbus.Services;
 using Kinef.Core.Models.Main;
 using Microsoft.Extensions.Logging;
@@ -6,8 +9,10 @@ using AdcBoardSettings = Idensity.Modbus.Models.Settings.AdcSettings.AdcBoardSet
 
 namespace Kinef.Core.Services
 {
-    public class IdensityService
+    public partial class IdensityService:ObservableObject
     {
+        [ObservableProperty]
+        public string _indicationString;
         public Device Device { get; } = new Device();
         private IdensityModbusClient _client = new IdensityModbusClient(ModbusType.Rtu, "COM4");
         private readonly ILogger<IdensityService> _logger;
@@ -29,15 +34,27 @@ namespace Kinef.Core.Services
             {
                 try
                 {
+                    var timer = new Stopwatch();
+                    timer.Start();
                     var indication = await _client.GetIndicationDataAsync();
+                    var options = new JsonSerializerOptions
+                    {
+                        WriteIndented = true,
+                        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                    };
+
+                    
                     Device.Temperature.Value = indication.TempBoardTelemetry.Temperature;
                     Device.Voltage.Value = indication.HvBoardTelemetry.OutputVoltage;
                     var settings = await _client.GetDeviceSettingsAsync();
+                    IndicationString = JsonSerializer.Serialize(settings, options);
                     Device.AdcBoardSettings.SyncLevel.Value = settings.AdcBoardSettings.SyncLevel;
                     Device.AdcBoardSettings.AdcSendEnabled.Value = settings.AdcBoardSettings.AdcDataSendEnabled;
                     Device.AdcBoardSettings.PreampGain.Value = settings.AdcBoardSettings.Gain;
                     Device.AdcBoardSettings.TimerAdc.Value = settings.AdcBoardSettings.TimerSendData;
-                    await Task.Delay(1000);
+                    var elapsed = timer.ElapsedMilliseconds;
+                    await Task.Delay(500);
                 }
                 catch (Exception ex)
                 {
@@ -53,7 +70,7 @@ namespace Kinef.Core.Services
             {
                 var settings = new AdcBoardSettings();
                 settings.TimerSendData = value;
-                await _client.WriteAdcBoardSettingsAsync(settings, "127.0.0.1", 1);
+                await _client.WriteAdcBoardSettingsAsync(settings, 1);
             }
             catch (Exception e)
             {

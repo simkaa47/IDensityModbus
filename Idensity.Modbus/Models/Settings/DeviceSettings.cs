@@ -39,12 +39,7 @@ public class DeviceSettings
     /// <summary>
     /// Натсройки компенсации температуры
     /// </summary>
-    public GetTemperature GetTemperature { get; } = new GetTemperature();
-    /// <summary>
-    /// Настройки фильтра калмана
-    /// </summary>
-    public KalmanSettings[] KalmanSettings { get; } = 
-        Enumerable.Range(0,2).Select(i=>new KalmanSettings()).ToArray();
+    public GetTemperature GetTemperature { get; } = new GetTemperature();    
     /// <summary>
     /// Номер проекта
     /// </summary>
