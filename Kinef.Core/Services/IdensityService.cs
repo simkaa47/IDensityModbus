@@ -13,6 +13,7 @@ namespace Kinef.Core.Services
     {
         [ObservableProperty]
         public string _indicationString;
+        string ip = "127.0.0.1";
         public Device Device { get; } = new Device();
         private IdensityModbusClient _client = new IdensityModbusClient(ModbusType.Rtu, "COM4");
         private readonly ILogger<IdensityService> _logger;
@@ -36,7 +37,7 @@ namespace Kinef.Core.Services
                 {
                     var timer = new Stopwatch();
                     timer.Start();
-                    var indication = await _client.GetIndicationDataAsync();
+                    var indication = await _client.GetIndicationDataAsync(ip);
                     var options = new JsonSerializerOptions
                     {
                         WriteIndented = true,
@@ -47,7 +48,7 @@ namespace Kinef.Core.Services
                     
                     Device.Temperature.Value = indication.TempBoardTelemetry.Temperature;
                     Device.Voltage.Value = indication.HvBoardTelemetry.OutputVoltage;
-                    var settings = await _client.GetDeviceSettingsAsync();
+                    var settings = await _client.GetDeviceSettingsAsync(ip);
                     IndicationString = JsonSerializer.Serialize(settings, options);
                     Device.AdcBoardSettings.SyncLevel.Value = settings.AdcBoardSettings.SyncLevel;
                     Device.AdcBoardSettings.AdcSendEnabled.Value = settings.AdcBoardSettings.AdcDataSendEnabled;
@@ -67,10 +68,8 @@ namespace Kinef.Core.Services
         public async Task WriteTimerAdcAsync(ushort value)
         {
             try
-            {
-                var settings = new AdcBoardSettings();
-                settings.TimerSendData = value;
-                await _client.WriteAdcBoardSettingsAsync(settings, 1);
+            { 
+                await _client.WriteAdcBoardTimerSendDataAsync(value, 1);
             }
             catch (Exception e)
             {

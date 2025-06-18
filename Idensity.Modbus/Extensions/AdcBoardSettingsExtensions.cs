@@ -21,24 +21,66 @@ internal static class AdcBoardSettingsExtensions
         settings.UdpPort = buffer[11];
         settings.HvSv = (ushort)(buffer[12]/20);
     }
-    
-    
-    internal static ushort[] GetRegisters(this AdcBoardSettings settings, ref ushort startIndex)
+
+
+    internal static ushort[] GetModeRegisters(AdcBoardMode mode, ref ushort startIndex)
     {
         startIndex = 3;
         return
         [
-            (ushort)settings.Mode,
-            settings.SyncLevel,
-            settings.TimerSendData,
-            settings.Gain,
-            settings.UpdAddress[0],
-            settings.UpdAddress[1],
-            settings.UpdAddress[2],
-            settings.UpdAddress[3],
-            settings.UdpPort,
-            (ushort)(settings.HvSv*20)
+            (ushort)mode
         ];
+    }
+    
+    internal static ushort[] GetSyncLevelRegisters(ushort level, ref ushort startIndex)
+    {
+        startIndex = 4;
+        return
+        [
+            level
+        ];
+    }
+    
+    internal static ushort[] GetTimerSendRegisters(ushort timerValue, ref ushort startIndex)
+    {
+        startIndex = 5;
+        return
+        [
+            timerValue
+        ];
+    }
+    
+    internal static ushort[] GetGainRegisters(byte gain, ref ushort startIndex)
+    {
+        startIndex = 6;
+        return
+        [
+            gain
+        ];
+    }
+    
+    internal static ushort[] GetUpdAddressRegisters(byte[] addr, ref ushort startIndex)
+    {
+        startIndex = 7;
+        if (addr.Length != 4)
+            throw new Exception("Адрес получателя данных спектра должен иметь 4 байта");
+        return addr.Select(x => (ushort)x).ToArray();
+    }
+    
+    internal static ushort[] GetUpdPortRegisters(ushort port, ref ushort startIndex)
+    {
+        startIndex = 11;
+        return [port];
+    }
+    
+    internal static ushort[] GetHvRegisters(ushort hv, ref ushort startIndex)
+    {
+        startIndex = 12;
+        return
+        [
+            (ushort)(hv * 20)
+        ];
+
     }
     
 }
