@@ -7,8 +7,36 @@
         xmlns:vm="using:Kinef.Core.ViewModels"
         x:DataType="vm:MainViewModel"
         Title="Kinef.View">
-   <Grid>
-       <ListBox HorizontalAlignment="Stretch">
+   <Grid RowDefinitions="Auto, *">
+       <Grid.Styles>
+           <Style Selector="Button">
+               <Setter Property="Margin" Value="2"></Setter>
+           </Style>
+       </Grid.Styles>
+       <WrapPanel>
+           <Button Content="Установить таймер выдачи данныx (123)" Command="{Binding SendTimerCommand}"/>
+           <Button Content="Установить уровень синхронизации (1166)" Command="{Binding SetSYncLevelCommand}"/>
+           <Button Content="Установить к-т предусиления (13)" Command="{Binding SetGainCommand}"/>
+           <Button Content="Установить адрес приема спектра (192.168.1.172)" Command="{Binding SetUdpIpCommand}"/>
+           <Button Content="Установить порт приема спектра (7777)" Command="{Binding SetUdpPortCommand}"/>
+           <Button Content="Установить HV (907)" Command="{Binding SetHvCommand}"/>
+           <Button Content="Установить значение счетчика (1134, 333, 2)" Command="{Binding SetCounterCommand}"/>
+           <Button Content="Установить настройки Ethernet ({192, 168, 1, 183}{255, 255, 255, 0}{192, 168, 1, 1})" 
+                   Command="{Binding SetEthernetSettingsCommand}"/>
+           <Button Content="Установить настройки порта (115200, RS485)" Command="{Binding SetSerialSettingsCommand}"/>
+           <Button Content="Переключить аналоговый вход 1" Command="{Binding SwitchAnalogInput1Command}"/>
+           <Button Content="Переключить аналоговый вход 2" Command="{Binding SwitchAnalogInput2Command}"/>
+           <Button Content="Переключить аналоговый выход 1" Command="{Binding SwitchAnalogoutput1Command}"/>
+           <Button Content="Переключить аналоговый выход 2" Command="{Binding SwitchAnalogoutput2Command}"/>
+           <Button Content="Записать настройки аналговых выходов" Command="{Binding SetAnalogSettingsCommand}"/>
+           <Button Content="Отправить тестовое значение на аналогвый выход 0 (12.87 mA)" Command="{Binding WriteTestValueCommand}"/>
+           <Button Content="Запустить цикл измерения" Command="{Binding SwitchCycleMeasOnCommand}"/>
+           <Button Content="Остановить цикл измерения" Command="{Binding SwitchCycleMeasOffCommand}"/>
+           
+          
+       </WrapPanel>
+       
+       <ListBox Grid.Row="1" HorizontalAlignment="Stretch">
            <DockPanel>
                <TextBlock Text="{Binding DeviceService.Device.Temperature.Description}"/>
                <TextBlock Text="{Binding DeviceService.Device.Temperature.Value}"
@@ -19,17 +47,6 @@
                <TextBlock Text="{Binding DeviceService.Device.Voltage.Value}"
                           HorizontalAlignment="Right"/>
            </DockPanel>
-           <DockPanel>
-               <TextBlock Text="{Binding DeviceService.Device.AdcBoardSettings.TimerAdc.Description}"/>
-               <TextBlock Text="{Binding DeviceService.Device.AdcBoardSettings.TimerAdc.Value}"
-                          HorizontalAlignment="Right"/>
-           </DockPanel>
-           <Button HorizontalAlignment="Stretch"
-                   Command="{Binding StartStopAdcDataCommand}"
-                   Content="Переключить разрешение на отправку данных АЦП"/>
-           <Button HorizontalAlignment="Stretch"
-                   Command="{Binding SendTimerCommand}"
-                   Content="Отправить таймер"/>
             <TextBlock Text="{Binding DeviceService.IndicationString}"/>
        </ListBox>
    </Grid>
