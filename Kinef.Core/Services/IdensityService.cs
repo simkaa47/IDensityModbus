@@ -235,6 +235,151 @@ namespace Kinef.Core.Services
                 Console.WriteLine(e);
             }
         }
+        
+        public async Task WriteMeasTime()
+        {
+            try
+            {
+                await _client.SetMeasProcDuration(7.5f, 2, 1);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+        
+        public async Task WriteMeasDeep()
+        {
+            try
+            {
+                await _client.WriteMeasProcDeep(12, 2, 1);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+        
+        public async Task WritePipeDiameter()
+        {
+            try
+            {
+                await _client.WriteMeasProcPipeDiameter(333, 2, 1);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+        
+        public async Task WriteCalcType()
+        {
+            try
+            {
+                await _client.WriteMeasProcCalcType(CalculationType.Attenuation, 2, 1);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+        
+        public async Task WriteMeasType()
+        {
+            try
+            {
+                await _client.WriteMeasProcMeasType(1, 2, 1);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+        
+        public async Task WriteDensityLiq()
+        {
+            try
+            {
+                await _client.WriteMeasProcDensityLiquid(666.67f, 2, 1);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+        
+        public async Task WriteDensitySol()
+        {
+            try
+            {
+                await _client.WriteMeasProcDensitySolid(777.67f, 2, 1);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+        
+        public async Task WriteFastChanges()
+        {
+            try
+            {
+                var fast = new FastChange()
+                {
+                    IsActive = true,
+                    Threshold = 13
+                };
+                await _client.WriteMeasProcFastChange(fast, 2, 1);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+        
+        public async Task WriteSingleMeasDuration()
+        {
+            try
+            {
+                await _client.WriteMeasProcSingleMeasDuration(45, 2, 1);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+        
+        public async Task WriteStandartisation()
+        {
+            try
+            {
+                var stand = new StandSettings()
+                {
+                    LastStandDate = new DateOnly(2023, 12, 17),
+                    Result = 1234.56f,
+                    HalfLifeResult = 1233.55f,
+                    StandDuration = 44
+
+                };
+                await _client.WriteMeasProcStandartisationData(stand, 2, 1, 1);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+        
+        public async Task MakeStandartisation()
+        {
+            try
+            {
+                await _client.MakeStandartisationAsync(2, 1, 1);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
 
 
     }

@@ -32,6 +32,17 @@
            <Button Content="Отправить тестовое значение на аналогвый выход 0 (12.87 mA)" Command="{Binding WriteTestValueCommand}"/>
            <Button Content="Запустить цикл измерения" Command="{Binding SwitchCycleMeasOnCommand}"/>
            <Button Content="Остановить цикл измерения" Command="{Binding SwitchCycleMeasOffCommand}"/>
+           <Button Content="Установить время одного измерения (7.5с, изм. пр. №2)" Command="{Binding WriteMeasTimeCommand}"/>
+           <Button Content="Установить глубину усреднения (12, изм. пр. №2)" Command="{Binding WriteMeasDeepCommand}"/>
+           <Button Content="Установить диаметр трубы (333 мм , изм. пр. №2)" Command="{Binding WritePipeDiameterCommand}"/>
+           <Button Content="Установить тип расчета (Ослабление , изм. пр. №2)" Command="{Binding WriteCalcTypeCommand}"/>
+           <Button Content="Установить тип измерения (1 , изм. пр. №2)" Command="{Binding WriteMeasTypeCommand}"/>
+           <Button Content="Установить плотность жидкого (666.67 , изм. пр. №2)" Command="{Binding WriteDensityLiqCommand}"/>
+           <Button Content="Установить плотность твердого (777.67 , изм. пр. №2)" Command="{Binding WriteDensitySolCommand}"/>
+           <Button Content="Установить настройки быстрых изменений (true, 13 , изм. пр. №2)" Command="{Binding WriteFastChangesCommand}"/>
+           <Button Content="Установить время ед измерения (45 , изм. пр. №2)" Command="{Binding WriteSingleMeasDurationCommand}"/>
+           <Button Content="Установить данные стандартизации (изм. пр. №2, станд № 1)" Command="{Binding WriteStandartisationCommand}"/>
+           <Button Content="Провести стандартизацию (изм. пр. №2, станд № 1)" Command="{Binding MakeStandartisationCommand}"/>
            
           
        </WrapPanel>

@@ -142,4 +142,61 @@ public partial class MainViewModel(
     {
         await DeviceService.SwitchCycleMeas(false);
     }
+    [RelayCommand]
+    public async Task WriteMeasTime()
+    {
+        await DeviceService.WriteMeasTime();
+    }
+    [RelayCommand]
+    public async Task WriteMeasDeep()
+    {
+        await DeviceService.WriteMeasDeep();
+    }
+    [RelayCommand]
+    public async Task WritePipeDiameter()
+    {
+        await DeviceService.WritePipeDiameter();
+    }
+    [RelayCommand]
+    public async Task WriteCalcType()
+    {
+        await DeviceService.WriteCalcType();
+    }
+    [RelayCommand]
+    public async Task WriteMeasType()
+    {
+        await DeviceService.WriteMeasType();
+    }
+
+    [RelayCommand]
+    public async Task WriteDensityLiq()
+    {
+        await DeviceService.WriteDensityLiq();
+    }
+    
+    [RelayCommand]
+    public async Task WriteDensitySol()
+    {
+        await DeviceService.WriteDensitySol();
+    }
+    [RelayCommand]
+    public async Task WriteFastChanges()
+    {
+        await DeviceService.WriteFastChanges();
+    }
+    [RelayCommand]
+    public async Task WriteSingleMeasDuration()
+    {
+        await DeviceService.WriteSingleMeasDuration();
+    }
+    [RelayCommand]
+    public async Task WriteStandartisation()
+    {
+        await DeviceService.WriteStandartisation();
+    }
+    [RelayCommand]
+    public async Task MakeStandartisation()
+    {
+        await DeviceService.MakeStandartisation();
+    }
 }
