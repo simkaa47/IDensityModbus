@@ -13,7 +13,7 @@ namespace Idensity.Modbus.Services;
 public class IdensityModbusClient
 {
     private const byte RegistersMaxSizeForRead = 50;
-    private ushort[] inputBuffer = new ushort[1000];
+    private readonly ushort[] _inputBuffer = new ushort[1000];
     private readonly ModbusRtuClient _rtuClient = new ModbusRtuClient();
     private readonly ModbusTcpClient _tcpClient = new ModbusTcpClient();
     private ModbusClient _client;
@@ -92,10 +92,9 @@ public class IdensityModbusClient
 
                 if (buffer.Length != tmpCnt)
                     throw new Exception("Buffer length doesn't match");
-                buffer.CopyTo(inputBuffer, start);
-                start+= tmpCnt;
+                buffer.CopyTo(_inputBuffer, start);
+                start += tmpCnt;
             }
-            
         }
         catch (Exception ex)
         {
@@ -169,13 +168,13 @@ public class IdensityModbusClient
     public async Task<DeviceIndication> GetIndicationDataAsync(byte unitId = 1)
     {
         await CommonReadAsync(0, 60, unitId, RegisterType.Input);
-        inputBuffer.SetMeasResults(_deviceIndication);
-        inputBuffer.SetCommunicationStates(_deviceIndication);
-        _deviceIndication.Rtc = inputBuffer.SetRtc(_deviceIndication.Rtc);
-        inputBuffer.SetAnalogOutputsIndication(_deviceIndication);
-        inputBuffer.SetAnalogInputsIndication(_deviceIndication);
-        inputBuffer.SetTemBoardTelemetry(_deviceIndication);
-        inputBuffer.SetHvBoardTelemetry(_deviceIndication);
+        _inputBuffer.SetMeasResults(_deviceIndication);
+        _inputBuffer.SetCommunicationStates(_deviceIndication);
+        _deviceIndication.Rtc = _inputBuffer.SetRtc(_deviceIndication.Rtc);
+        _inputBuffer.SetAnalogOutputsIndication(_deviceIndication);
+        _inputBuffer.SetAnalogInputsIndication(_deviceIndication);
+        _inputBuffer.SetTemBoardTelemetry(_deviceIndication);
+        _inputBuffer.SetHvBoardTelemetry(_deviceIndication);
 
         return _deviceIndication;
     }
@@ -183,16 +182,25 @@ public class IdensityModbusClient
     public async Task<DeviceSettings> GetDeviceSettingsAsync(byte unitId = 1)
     {
         await CommonReadAsync(0, 125, unitId, RegisterType.Holding);
-        inputBuffer.SetAdcBoardSettings(_deviceSettings.AdcBoardSettings);
-        inputBuffer.SetCounterSettings(_deviceSettings);
-        inputBuffer.SetModbusAddr(_deviceSettings);
-        inputBuffer.SetEthernetSettings(_deviceSettings);
-        inputBuffer.SetSerialSettings(_deviceSettings.SerialSettings);
-        inputBuffer.SetAnalogInputSettings(_deviceSettings);
-        inputBuffer.SetAnalogOutputSettings(_deviceSettings);
-        _deviceSettings.DeviceType = (DeviceType)inputBuffer[102];
-        _deviceSettings.LevelLength = inputBuffer.GetFloat(112);
-        inputBuffer.SetTemperatureCompensationSettings(_deviceSettings.GetTemperature);
+        _inputBuffer.SetAdcBoardSettings(_deviceSettings.AdcBoardSettings);
+        _inputBuffer.SetCounterSettings(_deviceSettings);
+        _inputBuffer.SetModbusAddr(_deviceSettings);
+        _inputBuffer.SetEthernetSettings(_deviceSettings);
+        _inputBuffer.SetSerialSettings(_deviceSettings.SerialSettings);
+        _inputBuffer.SetAnalogInputSettings(_deviceSettings);
+        _inputBuffer.SetAnalogOutputSettings(_deviceSettings);
+        _deviceSettings.DeviceType = (DeviceType)_inputBuffer[102];
+        _deviceSettings.LevelLength = _inputBuffer.GetFloat(112);
+        _inputBuffer.SetTemperatureCompensationSettings(_deviceSettings.GetTemperature);
+        for (byte i = 0; i < MeasProcessExtensions.MeasProcCnt; i++)
+        {
+            await CommonReadAsync(
+                (ushort)(MeasProcessExtensions.StartMeasProcRegisterOffset +
+                         MeasProcessExtensions.MeasProcRegisterCnt * i),
+                150, unitId, RegisterType.Holding);
+            _inputBuffer.SetMeasProcess(i, _deviceSettings.MeasProcesses[i]);
+        }
+
         return _deviceSettings;
     }
 
@@ -644,4 +652,347 @@ public class IdensityModbusClient
     {
         return CommonWriteAsync([..levelLength.GetRegisters()], 112, 2, unitId);
     }
+
+    public Task SwitchCycleMeasures(bool value, string ip, byte unitId = 1, int portNum = 502)
+    {
+        SetEthenetSettings(ip, portNum);
+        return SwitchCycleMeasures(value, unitId);
+    }
+
+
+    /// <summary>
+    /// Включить-выключить циклические измерения
+    /// </summary>
+    /// <param name="value">false  - выключить, true - включить</param>
+    /// <param name="unitId">Адрес в сети Modbus</param>
+    /// <returns></returns>
+    public Task SwitchCycleMeasures(bool value, byte unitId = 1)
+    {
+        return CommonWriteAsync([(ushort)(value ? 1 : 0)], 114, 1, unitId);
+    }
+
+    public Task SetMeasProcDuration(float duration, int measProcIndex, string ip, byte unitId = 1, int portNum = 502)
+    {
+        SetEthenetSettings(ip, portNum);
+        return SetMeasProcDuration(duration, measProcIndex, unitId);
+    }
+
+
+    /// <summary>
+    /// Записать длительность одного измерения, с
+    /// </summary>
+    /// <param name="duration">длительность одного измерения, с</param>
+    /// <param name="measProcIndex">Индекс изм процесса, 0-7</param>
+    /// <param name="unitId">Адрес в сети Modbus</param>
+    /// <returns></returns>
+    public Task SetMeasProcDuration(float duration, int measProcIndex, byte unitId = 1)
+    {
+        ushort startIndex = 0;
+        var buffer = MeasProcessExtensions.GetDurationRegisters(duration, measProcIndex, ref startIndex);
+        return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
+    }
+
+    public Task WriteMeasProcDeep(byte deep, int measProcIndex, string ip, byte unitId = 1, int portNum = 502)
+    {
+        SetEthenetSettings(ip, portNum);
+        return WriteMeasProcDeep(deep, measProcIndex, unitId);
+    }
+
+
+    /// <summary>
+    /// Записать кол-во точек усреднения
+    /// </summary>
+    /// <param name="deep">Кол-во точек усреднения, 0-99</param>
+    /// <param name="measProcIndex">Индекс изм проуесса</param>
+    /// <param name="unitId">Адрес в сети Modbus</param>
+    /// <returns></returns>
+    public Task WriteMeasProcDeep(byte deep, int measProcIndex, byte unitId = 1)
+    {
+        ushort startIndex = 0;
+        var buffer = MeasProcessExtensions.GetDeepRegisters(deep, measProcIndex, ref startIndex);
+        return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
+    }
+
+
+    public Task WriteMeasProcPipeDiameter(ushort diameter, int measProcIndex, string ip, byte unitId = 1,
+        int portNum = 502)
+    {
+        SetEthenetSettings(ip, portNum);
+        return WriteMeasProcPipeDiameter(diameter, measProcIndex, unitId);
+    }
+
+    /// <summary>
+    /// Записать диаметр трубы, мм
+    /// </summary>
+    /// <param name="diameter">диаметр трубы, мм</param>
+    /// <param name="measProcIndex">Индекс изм проуесса</param>
+    /// <param name="unitId">Адрес в сети Modbus</param>
+    /// <returns></returns>
+    public Task WriteMeasProcPipeDiameter(ushort diameter, int measProcIndex, byte unitId = 1)
+    {
+        ushort startIndex = 0;
+        var buffer = MeasProcessExtensions.GetPipeDiameterRegisters(diameter, measProcIndex, ref startIndex);
+        return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
+    }
+
+    public Task WriteMeasProcActivity(bool activity, int measProcIndex, string ip, byte unitId = 1, int portNum = 502)
+    {
+        SetEthenetSettings(ip, portNum);
+        return WriteMeasProcActivity(activity, measProcIndex, unitId);
+    }
+
+
+    /// <summary>
+    /// Установить активность изм процесса
+    /// </summary>
+    /// <param name="activity">Активность</param>
+    /// <param name="measProcIndex">Индекс изм проуесса</param>
+    /// <param name="unitId">Адрес в сети Modbus</param>
+    /// <returns></returns>
+    public Task WriteMeasProcActivity(bool activity, int measProcIndex, byte unitId = 1)
+    {
+        ushort startIndex = 0;
+        var buffer = MeasProcessExtensions.GetActivityRegisters(activity, measProcIndex, ref startIndex);
+        return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
+    }
+
+    public Task WriteMeasProcCalcType(CalculationType type, int measProcIndex, string ip, byte unitId = 1,
+        int portNum = 502)
+    {
+        SetEthenetSettings(ip, portNum);
+        return WriteMeasProcCalcType(type, measProcIndex, unitId);
+    }
+
+    /// <summary>
+    /// Записать тип расчета измерительного процесса
+    /// </summary>
+    /// <param name="type">Тип расчета измерительного процесса</param>
+    /// <param name="measProcIndex">Индекс изм проуесса</param>
+    /// <param name="unitId">Адрес в сети Modbus</param>
+    /// <returns></returns>
+    public Task WriteMeasProcCalcType(CalculationType type, int measProcIndex, byte unitId = 1)
+    {
+        ushort startIndex = 0;
+        var buffer = MeasProcessExtensions.GetCalculationTypeRegisters(type, measProcIndex, ref startIndex);
+        return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
+    }
+
+    public Task WriteMeasProcMeasType(ushort measType, int measProcIndex, string ip, byte unitId = 1,
+        int portNum = 502)
+    {
+        SetEthenetSettings(ip, portNum);
+        return WriteMeasProcMeasType(measType, measProcIndex, unitId);
+    }
+
+    /// <summary>
+    /// Записать тип измерения измерительного процесса
+    /// </summary>
+    /// <param name="measType">Тип измерения</param>
+    /// <param name="measProcIndex">Индекс изм проуесса</param>
+    /// <param name="unitId">Адрес в сети Modbus</param>
+    /// <returns></returns>
+    public Task WriteMeasProcMeasType(ushort measType, int measProcIndex, byte unitId = 1)
+    {
+        ushort startIndex = 0;
+        var buffer = MeasProcessExtensions.GetMeasTypeRegisters(measType, measProcIndex, ref startIndex);
+        return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
+    }
+
+    public Task WriteMeasProcDensityLiquid(float density, int measProcIndex, string ip, byte unitId = 1,
+        int portNum = 502)
+    {
+        SetEthenetSettings(ip, portNum);
+        return WriteMeasProcDensityLiquid(density, measProcIndex, unitId);
+    }
+
+    /// <summary>
+    /// Записать плотность жидкого в изм процесс
+    /// </summary>
+    /// <param name="density">Плотность жидкого</param>
+    /// <param name="measProcIndex">Индекс изм проуесса</param>
+    /// <param name="unitId">Адрес в сети Modbus</param>
+    /// <returns></returns>
+    public Task WriteMeasProcDensityLiquid(float density, int measProcIndex, byte unitId = 1)
+    {
+        ushort startIndex = 0;
+        var buffer = MeasProcessExtensions.GetDensityLiquidRegisters(density, measProcIndex, ref startIndex);
+        return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
+    }
+
+    public Task WriteMeasProcDensitySolid(float density, int measProcIndex, string ip, byte unitId = 1,
+        int portNum = 502)
+    {
+        SetEthenetSettings(ip, portNum);
+        return WriteMeasProcDensitySolid(density, measProcIndex, unitId);
+    }
+
+    /// <summary>
+    /// Записать плотность твердого в изм процесс
+    /// </summary>
+    /// <param name="density">Плотность твердого</param>
+    /// <param name="measProcIndex">Индекс изм проуесса</param>
+    /// <param name="unitId">Адрес в сети Modbus</param>
+    /// <returns></returns>
+    public Task WriteMeasProcDensitySolid(float density, int measProcIndex, byte unitId = 1)
+    {
+        ushort startIndex = 0;
+        var buffer = MeasProcessExtensions.GetDensitySolidRegisters(density, measProcIndex, ref startIndex);
+        return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
+    }
+
+    public Task WriteMeasProcFastChange(FastChange fastChange, int measProcIndex, string ip, byte unitId = 1,
+        int portNum = 502)
+    {
+        SetEthenetSettings(ip, portNum);
+        return WriteMeasProcFastChange(fastChange, measProcIndex, unitId);
+    }
+
+    /// <summary>
+    /// Записать настройки быстрых измерений в изм процесс
+    /// </summary>
+    /// <param name="fastChange">настройки быстрых измерений</param>
+    /// <param name="measProcIndex">Индекс изм проуесса</param>
+    /// <param name="unitId">Адрес в сети Modbus</param>
+    /// <returns></returns>
+    public Task WriteMeasProcFastChange(FastChange fastChange, int measProcIndex, byte unitId = 1)
+    {
+        ushort startIndex = 0;
+        var buffer = MeasProcessExtensions.GetFastChangeRegisters(fastChange, measProcIndex, ref startIndex);
+        return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
+    }
+
+    public Task WriteMeasProcSingleMeasDuration(ushort duration, int measProcIndex, string ip, byte unitId = 1,
+        int portNum = 502)
+    {
+        SetEthenetSettings(ip, portNum);
+        return WriteMeasProcSingleMeasDuration(duration, measProcIndex, unitId);
+    }
+
+
+    /// <summary>
+    /// Записать длительность единичного измерения, с
+    /// </summary>
+    /// <param name="duration">Длительность единичного измерения, с</param>
+    /// <param name="measProcIndex">Индекс изм проуесса</param>
+    /// <param name="unitId">Адрес в сети Modbus</param>
+    /// <returns></returns>
+    public Task WriteMeasProcSingleMeasDuration(ushort duration, int measProcIndex, byte unitId = 1)
+    {
+        ushort startIndex = 0;
+        var buffer = MeasProcessExtensions.GetSingleMeasureDurationRegisters(duration, measProcIndex, ref startIndex);
+        return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
+    }
+
+    public Task WriteMeasProcStandartisationData(StandSettings settings, int measProcIndex, int standIndex,
+        string ip, byte unitId = 1, int portNum = 502)
+    {
+        SetEthenetSettings(ip, portNum);
+        return WriteMeasProcStandartisationData(settings, measProcIndex, standIndex, unitId);
+    }
+
+    
+    /// <summary>
+    /// Записать данные стандартизации в измерительный процесс
+    /// </summary>
+    /// <param name="settings">данные стандартизации</param>
+    /// <param name="measProcIndex">Индекс изм проуесса</param>
+    /// <param name="standIndex">Индекс стандартизации</param>
+    /// <param name="unitId">Адрес в сети Modbus</param>
+    /// <returns></returns>
+    public Task WriteMeasProcStandartisationData(StandSettings settings, int measProcIndex, int standIndex,
+        byte unitId = 1)
+    {
+        ushort startIndex = 0;
+        var buffer =
+            MeasProcessExtensions.GetStandartisationRegisters(settings, measProcIndex, standIndex, ref startIndex);
+        return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
+    }
+
+    public Task WriteMeasProcCalibrCurve(CalibrCurve curve, int measProcIndex, string ip, byte unitId = 1,
+        int portNum = 502)
+    {
+        SetEthenetSettings(ip, portNum);
+        return WriteMeasProcCalibrCurve(curve, measProcIndex, unitId);
+    }
+    
+    /// <summary>
+    /// Записать данные калибровочной кривой
+    /// </summary>
+    /// <param name="curve">данные калибровочной кривой</param>
+    /// <param name="measProcIndex">Индекс изм проуесса</param>
+    /// <param name="unitId">Адрес в сети Modbus</param>
+    /// <returns></returns>
+    public Task WriteMeasProcCalibrCurve(CalibrCurve curve, int measProcIndex, byte unitId = 1)
+    {
+        ushort startIndex = 0;
+        var buffer = MeasProcessExtensions.GetCalibrCurveRegisters(curve, measProcIndex, ref startIndex);
+        return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
+    }
+
+    public Task WriteMeasProcSingleMeasResult(SingleMeasResult result, int measProcIndex, int singleMeasIndex,
+        string ip, byte unitId = 1, int portNum = 502)
+    {
+        SetEthenetSettings(ip, portNum);
+        return WriteMeasProcSingleMeasResult(result, measProcIndex, singleMeasIndex, unitId);
+    }
+
+    /// <summary>
+    /// Записать данные единичного измерения
+    /// </summary>
+    /// <param name="result">Данные единичного измерения</param>
+    /// <param name="measProcIndex">Индекс изм проуесса</param>
+    /// <param name="singleMeasIndex">Индекс ед измерения</param>
+    /// <param name="unitId">Адрес в сети Modbus</param>
+    /// <returns></returns>
+    public Task WriteMeasProcSingleMeasResult(SingleMeasResult result, int measProcIndex, int singleMeasIndex, byte unitId = 1)
+    {
+        ushort startIndex = 0;
+        var buffer = MeasProcessExtensions.GetSingleMeasureDataRegisters(result, measProcIndex, singleMeasIndex,  ref startIndex);
+        return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
+    }
+
+    public Task MakeStandartisationAsync(int measProcIndex, int standIndex, string ip, byte unitId = 1,
+        int portNum = 502)
+    {
+        SetEthenetSettings(ip, portNum);
+        return MakeStandartisationAsync(measProcIndex, standIndex, unitId);
+    }
+
+
+    /// <summary>
+    /// Команда провести стандартизацию
+    /// </summary>
+    /// <param name="measProcIndex">Индекс изм проуесса</param>
+    /// <param name="standIndex">Индекс стандартизации</param>
+    /// <param name="unitId">Адрес в сети Modbus</param>
+    /// <returns></returns>
+    public Task MakeStandartisationAsync(int measProcIndex, int standIndex, byte unitId = 1)
+    {
+        ushort startIndex = 0;
+        var buffer = MeasProcessExtensions.GetMakeStandartisationRegisters( measProcIndex, standIndex,  ref startIndex);
+        return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
+    }
+
+    public Task MakeSingleMeasureAsync(int measProcIndex, int singleMeasureIndex, string ip, byte unitId = 1,
+        int portNum = 502)
+    {
+        SetEthenetSettings(ip, portNum);
+        return MakeSingleMeasureAsync(measProcIndex, singleMeasureIndex, unitId);
+    }
+
+    /// <summary>
+    /// Провести единичное измерение
+    /// </summary>
+    /// <param name="measProcIndex">Индекс изм проуесса</param>
+    /// <param name="singleMeasureIndex">Индекс ед измерения</param>
+    /// <param name="unitId">Адрес в сети Modbus</param>
+    /// <returns></returns>
+    public Task MakeSingleMeasureAsync(int measProcIndex, int singleMeasureIndex, byte unitId = 1)
+    {
+        ushort startIndex = 0;
+        var buffer = MeasProcessExtensions.GetMakeSingleMeasureRegisters( measProcIndex, singleMeasureIndex,  ref startIndex);
+        return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
+    }
+    
+    
 }

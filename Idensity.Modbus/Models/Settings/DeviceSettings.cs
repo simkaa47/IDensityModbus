@@ -1,4 +1,5 @@
-﻿using Idensity.Modbus.Models.Settings.AdcSettings;
+﻿using Idensity.Modbus.Extensions;
+using Idensity.Modbus.Models.Settings.AdcSettings;
 using Idensity.Modbus.Models.Settings.Analogs;
 
 namespace Idensity.Modbus.Models.Settings;
@@ -14,7 +15,7 @@ public class DeviceSettings
     /// Данные измерительных процессов
     /// </summary>
     public List<MeasProcess> MeasProcesses { get;} = Enumerable
-        .Range(0,8).Select(i=> new MeasProcess()).ToList();
+        .Range(0,MeasProcessExtensions.MeasProcCnt).Select(i=> new MeasProcess()).ToList();
     /// <summary>
     /// Настройки счетчиков
     /// </summary>

@@ -5,7 +5,7 @@ public class SingleMeasResult
     /// <summary>
     /// Дата измерения
     /// </summary>
-    public DateOnly Date { get; internal set; }
+    public DateOnly Date { get; set; }
     /// <summary>
     /// Ослабление
     /// </summary>
@@ -13,5 +13,5 @@ public class SingleMeasResult
     /// <summary>
     /// Значение счетчика
     /// </summary>
-    public float CounterValue { get; internal set; }
+    public float PhysValue { get; set; }
 }

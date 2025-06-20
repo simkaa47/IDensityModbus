@@ -5,9 +5,9 @@ public class FastChange
     /// <summary>
     /// Активность быстрой смены.
     /// </summary>
-    public bool IsActive { get; internal set; }
+    public bool IsActive { get; set; }
     /// <summary>
     /// Пороговое значение для быстрой смены.
     /// </summary>
-    public ushort Threshold { get; internal set; }
+    public ushort Threshold { get; set; }
 }

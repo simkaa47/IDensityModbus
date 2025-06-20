@@ -1,41 +1,43 @@
-﻿namespace Idensity.Modbus.Models.Settings;
+﻿using Idensity.Modbus.Extensions;
+
+namespace Idensity.Modbus.Models.Settings;
 
 public class MeasProcess
 {
     /// <summary>
     /// Время измерения в секундах.
     /// </summary>
-    public float MeasDuration { get; internal set; }
+    public float MeasDuration { get; set; }
     /// <summary>
     /// Кол-во точек измерения для усреднения
     /// </summary>
-    public int MeasDeep { get; internal set; }
+    public int MeasDeep { get; set; }
     /// <summary>
     /// Диаметр трубы в мм
     /// </summary>
-    public float PipeDiameter { get;internal set; }
+    public float PipeDiameter { get;set; }
     /// <summary>
     /// Активность процесса измерения.
     /// </summary>
-    public bool Activity { get; internal set; }
+    public bool Activity { get; set; }
     /// <summary>
     /// Тип расчета измерения.
     /// </summary>
-    public CalculationType CalculationType { get; internal set; } = CalculationType.Polynom;
+    public CalculationType CalculationType { get; set; } = CalculationType.Polynom;
     /// <summary>
     /// Тип измерения
     /// </summary>
-    public int MeasType { get; internal set; }
+    public int MeasType { get; set; }
     /// <summary>
     /// Настройки стандартизаций
     /// </summary>
     public List<StandSettings> StandSettings { get; } = Enumerable
-        .Range(0, 3).Select(i => new StandSettings()).ToList();
+        .Range(0, MeasProcessExtensions.StandCnt).Select(i => new StandSettings()).ToList();
     /// <summary>
     /// Данные единичных измерений.
     /// </summary>
     public List<SingleMeasResult> SingleMeasResults { get; } = Enumerable
-        .Range(0, 10).Select(i => new SingleMeasResult()).ToList();
+        .Range(0, MeasProcessExtensions.SingleMeasuresCnt).Select(i => new SingleMeasResult()).ToList();
     /// <summary>
     /// Калибровочная кривая для данного процесса измерения.
     /// </summary>
@@ -43,20 +45,11 @@ public class MeasProcess
     /// <summary>
     /// Плотность жидкого
     /// </summary>
-    public float DensityLiquid { get; internal set; }
+    public float DensityLiquid { get; set; }
     /// <summary>
     /// Плотность твердого
     /// </summary>
-    public float DensitySolid { get; internal set; }
-    /// <summary>
-    /// Настройки компенсации температуры.  
-    /// </summary>
-    public List<TempCompensation> TempCompensations { get; } = Enumerable
-        .Range(0, 3).Select(i => new TempCompensation()).ToList();
-    /// <summary>
-    /// Настройки компенсации пара
-    /// </summary>
-    public SteamCompensation SteamCompensation { get; } = new SteamCompensation();
+    public float DensitySolid { get; set; }
     /// <summary>
     /// Настройки быстрых изменений.
     /// </summary>
@@ -71,9 +64,10 @@ public class MeasProcess
     /// </summary>  
     public List<float> VolumeCoeffs { get; }
         = Enumerable.Range(0, 4).Select(i => 0f).ToList();
-
-
-
-
+    
+    /// <summary>
+    /// Время ед измерения, с
+    /// </summary>
+    public ushort SingleMeasTime { get; set; }
 
 }
