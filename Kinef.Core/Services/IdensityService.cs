@@ -53,10 +53,10 @@ namespace Kinef.Core.Services
                     Device.Voltage.Value = indication.HvBoardTelemetry.OutputVoltage;
                     var settings = await _client.GetDeviceSettingsAsync(1);
                     _deviceSettings = settings;
-                    IndicationString = JsonSerializer.Serialize(settings, options);
+                    IndicationString = JsonSerializer.Serialize(indication, options);
                     
                     var elapsed = timer.ElapsedMilliseconds;
-                    await Task.Delay(500);
+                    await Task.Delay(100);
                 }
                 catch (Exception ex)
                 {

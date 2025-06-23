@@ -53,9 +53,9 @@ internal static class MeasProcessExtensions
 
         // Кривая
         process.CalibrCurve.Type = (CalibrationType)buffer[offset + 60];
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 6; i++)
         {
-            process.CalibrCurve.Coefficients[i] = buffer.GetFloat(offset + 60 + i);
+            process.CalibrCurve.Coefficients[i] = buffer.GetFloat(offset + 62 + i*2);
         }
 
         // Данные ед измерений

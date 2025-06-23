@@ -7,13 +7,14 @@ using Idensity.Modbus.Extensions;
 using Idensity.Modbus.Models.Settings;
 using Idensity.Modbus.Models.Settings.AdcSettings;
 using Idensity.Modbus.Models.Settings.Analogs;
+using System.ComponentModel.DataAnnotations;
 
 namespace Idensity.Modbus.Services;
 
 public class IdensityModbusClient
 {
     private const byte RegistersMaxSizeForRead = 50;
-    private readonly ushort[] _inputBuffer = new ushort[1000];
+    private readonly ushort[] _inputBuffer = new ushort[2000];
     private readonly ModbusRtuClient _rtuClient = new ModbusRtuClient();
     private readonly ModbusTcpClient _tcpClient = new ModbusTcpClient();
     private ModbusClient _client;
@@ -75,7 +76,7 @@ public class IdensityModbusClient
             int start = offset;
             for (int i = 0; i < steps; i++)
             {
-                var tmpCnt = i < steps - 1 ? RegistersMaxSizeForRead : count % RegistersMaxSizeForRead;
+                var tmpCnt = Math.Min(RegistersMaxSizeForRead, count- (i*RegistersMaxSizeForRead));
                 ushort[] buffer;
                 if (registerType == RegisterType.Holding)
                 {
@@ -88,7 +89,7 @@ public class IdensityModbusClient
                     var memory = await _client.ReadInputRegistersAsync<ushort>(unitId, start, tmpCnt)
                         .ConfigureAwait(false);
                     buffer = memory.ToArray();
-                }
+                }                
 
                 if (buffer.Length != tmpCnt)
                     throw new Exception("Buffer length doesn't match");
