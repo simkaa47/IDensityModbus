@@ -205,6 +205,7 @@ public class IdensityModbusClient
         return _deviceSettings;
     }
 
+    
     public Task ClearSpectrumAsync(string ip, byte unitId = 1, int portNum = 502)
     {
         SetEthenetSettings(ip, portNum);
@@ -270,25 +271,6 @@ public class IdensityModbusClient
     {
         var buffer = new ushort[] { value ? (ushort)1 : (ushort)0 };
         return CommonWriteAsync(buffer, 21, (ushort)buffer.Length, unitId);
-    }
-
-    public async Task WriteMeasProcessAsync(MeasProcess process, int processNum,
-        string ip, byte unitId = 1, int portNum = 502)
-    {
-        await Task.Delay(100);
-    }
-
-    /// <summary>
-    /// Записать измерительный процесс в устройство
-    /// </summary>
-    /// <param name="process">Данные</param>
-    /// <param name="processNum">Номер изм процесса</param>
-    /// <param name="unitId">Номер в сети modbus</param>
-    /// <returns></returns>
-    public async Task WriteMeasProcessAsync(MeasProcess process, int processNum,
-        byte unitId = 1)
-    {
-        await Task.Delay(100);
     }
 
     /// <summary>
@@ -384,7 +366,7 @@ public class IdensityModbusClient
     }
 
     /// <summary>
-    /// Записать настройки платы АЦП в устройство
+    /// Изменить режим работы платы АЦП
     /// </summary>
     /// <param name="mode"></param>
     /// <param name="unitId"></param>

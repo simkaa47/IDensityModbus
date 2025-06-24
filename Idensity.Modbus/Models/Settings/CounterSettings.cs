@@ -14,6 +14,5 @@ public class CounterSettings
     /// Ширина диапазона
     /// </summary>
     public ushort Width { get; set; }
-   
 
 }
