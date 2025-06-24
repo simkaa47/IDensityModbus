@@ -44,26 +44,7 @@ namespace Idensity.Modbus.Extensions
             ];
         }
 
-        internal static DateTime SetRtc(this ushort[] arr,  DateTime time)
-        {
-            int year = arr[18]+2000;
-            int month = arr[19];
-            if (month is < 1 or > 12)
-                return time;
-            int day = arr[20];
-            if (day < 1 || day > DateTime.DaysInMonth(year, month))
-                return time;
-            int hour = arr[21];
-            if (hour > 23)
-                return time;
-            int minute = arr[22];
-            if (minute > 59)
-                return time;
-            int second = arr[23];
-            if (second > 59)
-                return time;
-            return new DateTime(year, month, day, hour, minute, second);
-        }
+        
 
         internal static void SetMeasResults(this ushort[] arr, DeviceIndication deviceIndication)
         {

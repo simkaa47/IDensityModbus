@@ -382,5 +382,18 @@ namespace Kinef.Core.Services
         }
 
 
+        public async Task SetRtcAsync()
+        {
+            try
+            {
+                await _client.SetRtcAsync(DateTime.Now, 1);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+
+
     }
 }

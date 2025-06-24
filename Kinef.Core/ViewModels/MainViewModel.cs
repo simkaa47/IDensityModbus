@@ -199,4 +199,10 @@ public partial class MainViewModel(
     {
         await DeviceService.MakeStandartisation();
     }
+
+    [RelayCommand]
+    public async Task SetRtcAsync()
+    {
+        await DeviceService.SetRtcAsync();
+    }
 }

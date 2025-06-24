@@ -994,6 +994,28 @@ public class IdensityModbusClient
         var buffer = MeasProcessExtensions.GetMakeSingleMeasureRegisters( measProcIndex, singleMeasureIndex,  ref startIndex);
         return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
     }
+
+    public Task SetRtcAsync(DateTime time, string ip, byte unitId = 1, int portNum = 502)
+    {
+        SetEthenetSettings(ip, portNum);
+        return SetRtcAsync(time, unitId);
+    }
+
+    
+    /// <summary>
+    /// Установить RTC прибора
+    /// </summary>
+    /// <param name="time"></param>
+    /// <param name="unitId"></param>
+    /// <returns></returns>
+    public Task SetRtcAsync(DateTime time, byte unitId = 1)
+    {
+        ushort startIndex = 0;
+        var buffer = RtcExtensions.GetRegisters(time, ref startIndex);
+        return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
+    }
+    
+    
     
     
 }

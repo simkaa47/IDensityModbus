@@ -43,6 +43,7 @@
            <Button Content="Установить время ед измерения (45 , изм. пр. №2)" Command="{Binding WriteSingleMeasDurationCommand}"/>
            <Button Content="Установить данные стандартизации (изм. пр. №2, станд № 1)" Command="{Binding WriteStandartisationCommand}"/>
            <Button Content="Провести стандартизацию (изм. пр. №2, станд № 1)" Command="{Binding MakeStandartisationCommand}"/>
+           <Button Content="Установить rtc" Command="{Binding SetRtcCommand}"/>
            
           
        </WrapPanel>
