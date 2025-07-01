@@ -1,0 +1,44 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:WriteSpectrum.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="WriteSpectrum.MainWindow"
+        x:DataType="viewModels:MainViewModel"
+        Title="WriteSpectrum">
+    <Grid RowDefinitions="*, Auto">
+        <StackPanel>
+            <TextBlock Text="Путь в файлу"/>
+            <DockPanel>
+                <TextBlock Text="{Binding Path}"
+                           VerticalAlignment="Center"></TextBlock>
+                <Button Command="{Binding GetFileCommand}"
+                        Content="Выбрать файл"
+                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"></Button>
+            </DockPanel>
+            <ComboBox ItemsSource="{Binding Logs}"
+                      DisplayMemberBinding="{Binding Time}"
+                      SelectedItem="{Binding SelectedLog}"></ComboBox>
+            <StackPanel Orientation="Horizontal">
+                <TextBox Text="{Binding Ip0}"
+                         Margin="2" Width="60"/>
+                <TextBox Text="{Binding Ip1}"
+                         Margin="2" Width="60"/>
+                <TextBox Text="{Binding Ip2}"
+                         Margin="2" Width="60"/>
+                <TextBox Text="{Binding Ip3}"
+                         Margin="2" Width="60"/>
+                <Button Command="{Binding WriteSpectrumCommand}"
+                        Content="Записать спектр"
+                        IsEnabled="{Binding SelectedLog, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+            </StackPanel>
+        </StackPanel>
+        <TextBlock Grid.Row="1"
+                   Text="{Binding ErrStatus}"
+                   Foreground="Red"
+                   VerticalAlignment="Bottom"></TextBlock>
+        
+        
+    </Grid>
+</Window>
