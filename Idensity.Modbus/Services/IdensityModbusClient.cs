@@ -1019,7 +1019,8 @@ public class IdensityModbusClient
         {
             try
             {
-                await CommonWriteAsync(buffer.Skip(i*50).Take(50).ToArray(), (ushort)(4000+i*50), 50, unitId);
+                var cnt = Math.Min(4096-i*50, 50);
+                await CommonWriteAsync(buffer.Skip(i*50).Take(cnt).ToArray(), (ushort)(4000+i*50), (ushort)cnt, unitId);
                 i++;
             }
             catch (Exception e)
@@ -1031,6 +1032,8 @@ public class IdensityModbusClient
                 }
             }
         }
+
+        await CommonWriteAsync([1], 8096, 1, 1);
     }
 
 
