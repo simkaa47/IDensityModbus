@@ -5,6 +5,7 @@
       <map>
         <entry key="Kinef.View/App.axaml" value="Kinef.View/Kinef.View.csproj" />
         <entry key="Kinef.View/MainWindow.axaml" value="Kinef.View/Kinef.View.csproj" />
+        <entry key="WriteSpectrum/App.axaml" value="WriteSpectrum/WriteSpectrum.csproj" />
       </map>
     </option>
   </component>

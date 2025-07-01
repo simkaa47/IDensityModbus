@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kinef.View", "Kinef.View\Ki
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Idensity.Modbus", "Idensity.Modbus\Idensity.Modbus.csproj", "{698B8A09-E563-4934-86A1-14782BF6866D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WriteSpectrum", "WriteSpectrum\WriteSpectrum.csproj", "{3CCA88E2-3819-490F-85BA-BD01DE517ACF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,18 @@ Global
 		{698B8A09-E563-4934-86A1-14782BF6866D}.Release|x64.Build.0 = Release|Any CPU
 		{698B8A09-E563-4934-86A1-14782BF6866D}.Release|x86.ActiveCfg = Release|Any CPU
 		{698B8A09-E563-4934-86A1-14782BF6866D}.Release|x86.Build.0 = Release|Any CPU
+		{3CCA88E2-3819-490F-85BA-BD01DE517ACF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CCA88E2-3819-490F-85BA-BD01DE517ACF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CCA88E2-3819-490F-85BA-BD01DE517ACF}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3CCA88E2-3819-490F-85BA-BD01DE517ACF}.Debug|x64.Build.0 = Debug|Any CPU
+		{3CCA88E2-3819-490F-85BA-BD01DE517ACF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3CCA88E2-3819-490F-85BA-BD01DE517ACF}.Debug|x86.Build.0 = Debug|Any CPU
+		{3CCA88E2-3819-490F-85BA-BD01DE517ACF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CCA88E2-3819-490F-85BA-BD01DE517ACF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3CCA88E2-3819-490F-85BA-BD01DE517ACF}.Release|x64.ActiveCfg = Release|Any CPU
+		{3CCA88E2-3819-490F-85BA-BD01DE517ACF}.Release|x64.Build.0 = Release|Any CPU
+		{3CCA88E2-3819-490F-85BA-BD01DE517ACF}.Release|x86.ActiveCfg = Release|Any CPU
+		{3CCA88E2-3819-490F-85BA-BD01DE517ACF}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -76,7 +76,7 @@ public class IdensityModbusClient
             int start = offset;
             for (int i = 0; i < steps; i++)
             {
-                var tmpCnt = Math.Min(RegistersMaxSizeForRead, count- (i*RegistersMaxSizeForRead));
+                var tmpCnt = Math.Min(RegistersMaxSizeForRead, count - (i * RegistersMaxSizeForRead));
                 ushort[] buffer;
                 if (registerType == RegisterType.Holding)
                 {
@@ -89,7 +89,7 @@ public class IdensityModbusClient
                     var memory = await _client.ReadInputRegistersAsync<ushort>(unitId, start, tmpCnt)
                         .ConfigureAwait(false);
                     buffer = memory.ToArray();
-                }                
+                }
 
                 if (buffer.Length != tmpCnt)
                     throw new Exception("Buffer length doesn't match");
@@ -205,7 +205,7 @@ public class IdensityModbusClient
         return _deviceSettings;
     }
 
-    
+
     public Task ClearSpectrumAsync(string ip, byte unitId = 1, int portNum = 502)
     {
         SetEthenetSettings(ip, portNum);
@@ -873,7 +873,7 @@ public class IdensityModbusClient
         return WriteMeasProcStandartisationData(settings, measProcIndex, standIndex, unitId);
     }
 
-    
+
     /// <summary>
     /// Записать данные стандартизации в измерительный процесс
     /// </summary>
@@ -897,7 +897,7 @@ public class IdensityModbusClient
         SetEthenetSettings(ip, portNum);
         return WriteMeasProcCalibrCurve(curve, measProcIndex, unitId);
     }
-    
+
     /// <summary>
     /// Записать данные калибровочной кривой
     /// </summary>
@@ -927,10 +927,12 @@ public class IdensityModbusClient
     /// <param name="singleMeasIndex">Индекс ед измерения</param>
     /// <param name="unitId">Адрес в сети Modbus</param>
     /// <returns></returns>
-    public Task WriteMeasProcSingleMeasResult(SingleMeasResult result, int measProcIndex, int singleMeasIndex, byte unitId = 1)
+    public Task WriteMeasProcSingleMeasResult(SingleMeasResult result, int measProcIndex, int singleMeasIndex,
+        byte unitId = 1)
     {
         ushort startIndex = 0;
-        var buffer = MeasProcessExtensions.GetSingleMeasureDataRegisters(result, measProcIndex, singleMeasIndex,  ref startIndex);
+        var buffer =
+            MeasProcessExtensions.GetSingleMeasureDataRegisters(result, measProcIndex, singleMeasIndex, ref startIndex);
         return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
     }
 
@@ -952,7 +954,7 @@ public class IdensityModbusClient
     public Task MakeStandartisationAsync(int measProcIndex, int standIndex, byte unitId = 1)
     {
         ushort startIndex = 0;
-        var buffer = MeasProcessExtensions.GetMakeStandartisationRegisters( measProcIndex, standIndex,  ref startIndex);
+        var buffer = MeasProcessExtensions.GetMakeStandartisationRegisters(measProcIndex, standIndex, ref startIndex);
         return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
     }
 
@@ -973,7 +975,8 @@ public class IdensityModbusClient
     public Task MakeSingleMeasureAsync(int measProcIndex, int singleMeasureIndex, byte unitId = 1)
     {
         ushort startIndex = 0;
-        var buffer = MeasProcessExtensions.GetMakeSingleMeasureRegisters( measProcIndex, singleMeasureIndex,  ref startIndex);
+        var buffer =
+            MeasProcessExtensions.GetMakeSingleMeasureRegisters(measProcIndex, singleMeasureIndex, ref startIndex);
         return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
     }
 
@@ -983,7 +986,7 @@ public class IdensityModbusClient
         return SetRtcAsync(time, unitId);
     }
 
-    
+
     /// <summary>
     /// Установить RTC прибора
     /// </summary>
@@ -996,8 +999,41 @@ public class IdensityModbusClient
         var buffer = RtcExtensions.GetRegisters(time, ref startIndex);
         return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
     }
-    
-    
-    
-    
+
+
+    public Task WriteSpectrumAsync(ushort[] buffer, string ip, byte unitId = 1, int portNum = 502)
+    {
+        SetEthenetSettings(ip, portNum);
+        return WriteSpectrumAsync(buffer, unitId);
+    }
+
+
+    public async Task WriteSpectrumAsync(ushort[] buffer, byte unitId = 1)
+    {
+        if(buffer.Length!= 4096)
+            throw new Exception("Spectrum buffer length must be 4096");
+        await SwitchCycleMeasures(false, unitId);
+        int errCnt = 0;
+        int i = 0;
+        while (i < 82)
+        {
+            try
+            {
+                await CommonWriteAsync(buffer.Skip(i*50).Take(50).ToArray(), (ushort)(4000+i*50), 50, unitId);
+                i++;
+            }
+            catch (Exception e)
+            {
+                errCnt++;
+                if (errCnt == 5)
+                {
+                    throw new Exception("Error write spectrum", e);
+                }
+            }
+        }
+    }
+
+
+
+
 }
