@@ -32,6 +32,13 @@
                 <Button Command="{Binding WriteSpectrumCommand}"
                         Content="Записать спектр"
                         IsEnabled="{Binding SelectedLog, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Адрес в сети Modbus (1)"
+                           VerticalAlignment="Center"></TextBlock>
+                <TextBox Text="{Binding Id}"
+                         Margin="2" Width="60"/>
             </StackPanel>
         </StackPanel>
         <TextBlock Grid.Row="1"

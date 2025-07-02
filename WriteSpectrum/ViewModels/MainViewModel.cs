@@ -23,21 +23,24 @@ public partial class MainViewModel:ObservableObject
     private string? _errStatus;
     
     [ObservableProperty]
+    private byte _id = 1;
+    
+    [ObservableProperty]
     private string? _path;
     
     [ObservableProperty]
     private LogCell? _selectedLog;
 
     [ObservableProperty]
-    private byte _ip0 = 127;
+    private byte _ip0 = 192;
     
     [ObservableProperty]
-    private byte _ip1 = 0;
+    private byte _ip1 = 168;
     
     [ObservableProperty]
-    private byte _ip2 = 0;
+    private byte _ip2 = 1;
     [ObservableProperty]
-    private byte _ip3 = 1;
+    private byte _ip3 = 180;
 
     [RelayCommand]
     private async Task WriteSpectrumAsync()
@@ -47,7 +50,7 @@ public partial class MainViewModel:ObservableObject
             if (SelectedLog is not  null)
             {
                 ErrStatus = string.Empty;
-                await _client.WriteSpectrumAsync(SelectedLog.Spectrum, $"{Ip0}.{Ip1}.{Ip2}.{Ip3}");
+                await _client.WriteSpectrumAsync(SelectedLog.Spectrum, $"{Ip0}.{Ip1}.{Ip2}.{Ip3}", Id);
             }
         }
         catch (Exception e)
