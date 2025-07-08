@@ -6,7 +6,18 @@ internal static class MeasProcessExtensions
 {
     internal const ushort StartMeasProcRegisterOffset = 200;
     internal const ushort MeasProcRegisterCnt = 180;
-    internal const ushort MeasProcCnt = 8;
+    private  static  ushort _measProcCnt = 2;
+    public static ushort MeasProcCnt
+    {
+        get => _measProcCnt;
+        set
+        {
+            if (value < 8)
+            {
+                _measProcCnt = value;
+            }
+        }
+    }
 
     internal const ushort StandRegisterOffset = 24;
     internal const ushort StandRegisterCnt = 12;

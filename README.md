@@ -71,7 +71,10 @@ var settings = await _client.GetDeviceSettingsAsync(1);
 ```csharp
 var settings = await _client.GetDeviceSettingsAsync("192.168.1.192");
 ```
-
+### Кол-во измерительных процессов
+```csharp
+MeasProcessExtensions.MeasProcCnt = 4;
+```
 ## Запись в плотномер
 
 ### Очистка спектра
@@ -938,8 +941,8 @@ public Task WriteMeasProcSingleMeasDuration(ushort duration, int measProcIndex, 
 ```
 **Modbus TCP**
 ```csharp
-public Task WriteMeasProcStandartisationData(StandSettings settings, int measProcIndex, int standIndex,
-        string ip, byte unitId = 1, int portNum = 502)
+public Task WriteMeasProcSingleMeasDuration(ushort duration, int measProcIndex, string ip, byte unitId = 1,
+        int portNum = 502)
 {
     ...
 }
