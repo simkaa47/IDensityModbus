@@ -277,7 +277,7 @@ internal static class MeasProcessExtensions
             (ushort)result.Date.Day,
             0,
             ..result.Weak.GetRegisters(),
-            ..result.Weak.GetRegisters(),
+            ..result.PhysValue.GetRegisters(),
         ];
 
     }
