@@ -183,7 +183,7 @@ public class IdensityModbusClient
 
     public async Task<DeviceSettings> GetDeviceSettingsAsync(byte unitId = 1)
     {
-        await CommonReadAsync(0, 125, unitId, RegisterType.Holding);
+        await CommonReadAsync(0, 130, unitId, RegisterType.Holding);
         _inputBuffer.SetAdcBoardSettings(_deviceSettings.AdcBoardSettings);
         _inputBuffer.SetCounterSettings(_deviceSettings);
         _inputBuffer.SetModbusAddr(_deviceSettings);
