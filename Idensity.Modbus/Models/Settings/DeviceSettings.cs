@@ -66,5 +66,7 @@ public class DeviceSettings
     /// </summary>
     public AnalogOutputSettings[] AnalogOutputSettings { get; } = 
         Enumerable.Range(0,2).Select(i=> new AnalogOutputSettings()).ToArray();
+    
+    public string DeviceName { get; set; } = string.Empty;
 
 }

@@ -8,6 +8,7 @@ using Idensity.Modbus.Models.Settings;
 using Idensity.Modbus.Models.Settings.AdcSettings;
 using Idensity.Modbus.Models.Settings.Analogs;
 using System.ComponentModel.DataAnnotations;
+using System.Text;
 
 namespace Idensity.Modbus.Services;
 
@@ -186,6 +187,7 @@ public class IdensityModbusClient
         _inputBuffer.SetAdcBoardSettings(_deviceSettings.AdcBoardSettings);
         _inputBuffer.SetCounterSettings(_deviceSettings);
         _inputBuffer.SetModbusAddr(_deviceSettings);
+        _inputBuffer.SetDeviceName(_deviceSettings);
         _inputBuffer.SetEthernetSettings(_deviceSettings);
         _inputBuffer.SetSerialSettings(_deviceSettings.SerialSettings);
         _inputBuffer.SetAnalogInputSettings(_deviceSettings);
@@ -999,6 +1001,30 @@ public class IdensityModbusClient
         var buffer = RtcExtensions.GetRegisters(time, ref startIndex);
         return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
     }
+    
+    public Task SetDeviceNameAsync(string name, string ip, byte unitId = 1, int portNum = 502)
+    {
+        SetEthenetSettings(ip, portNum);
+        return SetDeviceNameAsync(name, unitId);
+    }
+
+
+    public Task SetDeviceNameAsync(string name, byte unitId = 1)
+    {
+        var regs = new ushort[5];
+        string paddedString = name.Length > 10 
+            ? name.Substring(0, 10)
+            : name;
+        byte[] dataBytes = new byte[10];
+        for (var i = 0; i < 5; i++)
+        {
+            int byteIndex = i * 2; 
+            ushort msb = dataBytes[byteIndex];
+            ushort lsb = dataBytes[byteIndex + 1];
+            regs[i] = (ushort)((msb << 8) | lsb);
+        }
+        return CommonWriteAsync(regs, 124, (ushort)regs.Length, unitId);
+    }
 
 
     public Task WriteSpectrumAsync(ushort[] buffer, string ip, byte unitId = 1, int portNum = 502)
@@ -1036,8 +1062,6 @@ public class IdensityModbusClient
 
         await CommonWriteAsync([1], 8096, 1, unitId);
     }
-
-
 
 
 }

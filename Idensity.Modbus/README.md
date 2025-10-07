@@ -1145,4 +1145,25 @@ public Task SetRtcAsync(DateTime time, string ip, byte unitId = 1, int portNum =
     ...
 }
 ```
+### Записать серийный номер прибора
+**Modbus RTU**
+```csharp
+/// <summary>
+/// Записать серийный номер прибора
+/// </summary>
+/// <param name="name"></param>
+/// <param name="unitId"></param>
+/// <returns></returns>
+public Task SetDeviceNameAsync(string name, byte unitId = 1)
+{
+    ...
+}
+```
+**Modbus TCP**
+```csharp
+public Task SetDeviceNameAsync(string name, string ip, byte unitId = 1, int portNum = 502)
+{
+    ...
+}
+```
 

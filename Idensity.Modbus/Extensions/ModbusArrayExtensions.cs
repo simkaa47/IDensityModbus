@@ -1,4 +1,5 @@
-﻿using Idensity.Modbus.Models.Indication;
+﻿using System.Text;
+using Idensity.Modbus.Models.Indication;
 using Idensity.Modbus.Models.Settings;
 using Idensity.Modbus.Models.Settings.AdcSettings;
 
@@ -14,7 +15,7 @@ namespace Idensity.Modbus.Extensions
                 .ToArray();
             return BitConverter.ToSingle(bytes);
         }
-        
+
         public static uint GetUint(this ushort[] arr, int index)
         {
             var bytes = arr.Skip(index)
@@ -29,22 +30,21 @@ namespace Idensity.Modbus.Extensions
             var bytes = BitConverter.GetBytes(value);
             return
             [
-                BitConverter.ToUInt16(bytes,0),
-                BitConverter.ToUInt16(bytes,2),
+                BitConverter.ToUInt16(bytes, 0),
+                BitConverter.ToUInt16(bytes, 2),
             ];
         }
-        
+
         public static ushort[] GetRegisters(this uint value)
         {
             var bytes = BitConverter.GetBytes(value);
             return
             [
-                BitConverter.ToUInt16(bytes,0),
-                BitConverter.ToUInt16(bytes,2),
+                BitConverter.ToUInt16(bytes, 0),
+                BitConverter.ToUInt16(bytes, 2),
             ];
         }
 
-        
 
         internal static void SetMeasResults(this ushort[] arr, DeviceIndication deviceIndication)
         {
@@ -81,6 +81,14 @@ namespace Idensity.Modbus.Extensions
         internal static void SetModbusAddr(this ushort[] buffer, DeviceSettings settings)
         {
             settings.ModbusId = (byte)buffer[0];
+        }
+
+        internal static void SetDeviceName(this ushort[] buffer, DeviceSettings settings)
+        {
+            var bytes = buffer.Skip(124).Take(5)
+                .SelectMany(x=>BitConverter.GetBytes(x).Reverse())
+                .ToArray();
+            settings.DeviceName = Encoding.ASCII.GetString(bytes);
         }
     }
 }
