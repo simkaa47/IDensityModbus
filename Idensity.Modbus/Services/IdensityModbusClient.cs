@@ -1015,12 +1015,14 @@ public class IdensityModbusClient
         string paddedString = name.Length > 10 
             ? name.Substring(0, 10)
             : name;
+        byte[] stringBytes = Encoding.ASCII.GetBytes(paddedString);
         byte[] dataBytes = new byte[10];
+        Array.Copy(stringBytes, 0, dataBytes, 0, stringBytes.Length);
         for (var i = 0; i < 5; i++)
         {
             int byteIndex = i * 2; 
-            ushort msb = dataBytes[byteIndex];
-            ushort lsb = dataBytes[byteIndex + 1];
+            ushort msb = dataBytes[byteIndex + 1];
+            ushort lsb = dataBytes[byteIndex];
             regs[i] = (ushort)((msb << 8) | lsb);
         }
         return CommonWriteAsync(regs, 124, (ushort)regs.Length, unitId);

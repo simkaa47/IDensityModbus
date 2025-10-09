@@ -86,7 +86,7 @@ namespace Idensity.Modbus.Extensions
         internal static void SetDeviceName(this ushort[] buffer, DeviceSettings settings)
         {
             var bytes = buffer.Skip(124).Take(5)
-                .SelectMany(x=>BitConverter.GetBytes(x).Reverse())
+                .SelectMany(BitConverter.GetBytes)
                 .ToArray();
             settings.DeviceName = Encoding.ASCII.GetString(bytes);
         }
