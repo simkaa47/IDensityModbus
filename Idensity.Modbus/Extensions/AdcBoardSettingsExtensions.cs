@@ -20,6 +20,7 @@ internal static class AdcBoardSettingsExtensions
         }
         settings.UdpPort = buffer[11];
         settings.HvSv = (ushort)(buffer[12]/20);
+        settings.PeakSpectrumSv = buffer[13];
     }
 
 
@@ -82,5 +83,15 @@ internal static class AdcBoardSettingsExtensions
         ];
 
     }
-    
+
+    internal static ushort[] GetPeakSpectrumSvRegisters(ushort peak, ref ushort startIndex)
+    {
+        startIndex = 13;
+        return
+        [
+            peak
+        ];
+
+    }
+
 }

@@ -31,6 +31,10 @@ public class AdcBoardSettings
     /// </summary>
     public ushort HvSv { get;  set; }
     /// <summary>
+    /// Координата пика спектра
+    /// </summary>
+    public ushort PeakSpectrumSv { get; set; }
+    /// <summary>
     /// Разрешение на выжачу данных АЦП
     /// </summary>
     public bool AdcDataSendEnabled { get; set; }

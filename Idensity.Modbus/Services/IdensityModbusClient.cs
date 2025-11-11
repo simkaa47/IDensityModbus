@@ -494,6 +494,27 @@ public class IdensityModbusClient
         return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
     }
 
+    public Task WriteAdcBoarPeakSpectrumAsync(ushort peak, string ip, byte unitId = 1, int portNum = 502)
+    {
+        SetEthenetSettings(ip, portNum);
+        return WriteAdcBoarPeakSpectrumAsync(peak, unitId);
+    }
+
+
+    /// <summary>
+    /// Установить координату пика спектра
+    /// </summary>
+    /// <param name="peak">Координата пика спектра</param>
+    /// <param name="unitId"></param>
+    /// <returns></returns>
+    public Task WriteAdcBoarPeakSpectrumAsync(ushort peak, byte unitId = 1)
+    {
+        ushort startIndex = 0;
+        var buffer = AdcBoardSettingsExtensions.GetPeakSpectrumSvRegisters(peak, ref startIndex);
+        return CommonWriteAsync(buffer, startIndex, (ushort)buffer.Length, unitId);
+    }
+
+
     public Task SetAnalogInputActivityAsync(byte inputNumber, bool value, string ip,
         byte unitId = 1, int portNum = 502)
     {

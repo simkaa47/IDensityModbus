@@ -455,6 +455,27 @@ public Task WriteAdcBoardHvAsync(ushort hv, string ip, byte unitId = 1, int port
     ...
 }
 ```
+### Установить координату пика спектра
+**Modbus RTU**
+```csharp
+/// <summary>
+/// Установить координату пика спектра
+/// </summary>
+/// <param name="peak">Координата пика спектра</param>
+/// <param name="unitId"></param>
+/// <returns></returns>
+public Task WriteAdcBoarPeakSpectrumAsync(ushort peak, byte unitId = 1)
+{
+    ...
+}
+```
+**Modbus TCP**
+```csharp
+public Task WriteAdcBoarPeakSpectrumAsync(ushort peak, string ip, byte unitId = 1, int portNum = 502)
+{
+    ...
+}
+```
 ### Установить активность аналогового входа устройства
 **Modbus RTU**
 ```csharp
