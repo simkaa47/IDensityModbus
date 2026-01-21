@@ -1187,4 +1187,24 @@ public Task SetDeviceNameAsync(string name, string ip, byte unitId = 1, int port
     ...
 }
 ```
+### Перезагрузить прибор
+**Modbus RTU**
+```csharp
+/// <summary>
+/// Перезагрузить прибор
+/// </summary>
+/// <param name="unitId"></param>
+/// <returns></returns>
+public Task RebootDeviceAsync(byte unitId = 1)
+{
+    ...
+}
+```
+**Modbus TCP**
+```csharp
+public Task RebootDeviceAsync(string ip, byte unitId = 1, int portNum = 502)
+{
+    ...
+}
+```
 

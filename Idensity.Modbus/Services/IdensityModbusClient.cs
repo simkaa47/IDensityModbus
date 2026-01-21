@@ -1049,6 +1049,17 @@ public class IdensityModbusClient
         return CommonWriteAsync(regs, 124, (ushort)regs.Length, unitId);
     }
 
+    public Task RebootDeviceAsync(string ip, byte unitId = 1, int portNum = 502)
+    {
+        SetEthenetSettings(ip, portNum);
+        return RebootDeviceAsync(unitId);
+    }
+
+    public Task RebootDeviceAsync(byte unitId = 1)
+    {
+        return CommonWriteAsync([1], 129, 1, unitId);
+    }
+
 
     public Task WriteSpectrumAsync(ushort[] buffer, string ip, byte unitId = 1, int portNum = 502)
     {
