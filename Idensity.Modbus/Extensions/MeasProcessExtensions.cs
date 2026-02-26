@@ -272,7 +272,7 @@ internal static class MeasProcessExtensions
 
         return
         [
-            (ushort)result.Date.Year,
+            (ushort)(result.Date.Year-2000),
             (ushort)result.Date.Month,
             (ushort)result.Date.Day,
             0,
